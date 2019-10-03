@@ -19,35 +19,45 @@ V Y
 
 pygame.init()
 window = pygame.display.set_mode(window_size)
-wall_img = pygame.image.load('wall-64.png').convert()
+wall_img = pygame.image.load('wall-2-64.png').convert()
 pacman_img = pygame.image.load('pacman-64.png').convert()
+cxk_img = pygame.image.load('cxk-64.png').convert()
+ball_img = pygame.image.load('ball-64.png').convert()
+
 tile_table = [[wall_img if random.randint(
     0, 10) > 7 else None for _ in range(12)] for _ in range(12)]
-left_margin = (window_size[0] - len(tile_table[0]) * block_size[0]) / 2
+left_margin = (window_size[0] - len(tile_table[0]) * block_size[0]) // 2
 table_rct = ((left_margin, 0),
              (left_margin+block_size[0]*len(tile_table[0]),
               block_size[1] * len(tile_table)))
 obj_in_mouse = None
 
+toolbar = [pacman_img]
+
+toolbar_left_margin = left_margin + 20
+toolbar_top_margin = block_size[1] * len(tile_table) + 10
+toolbar_rct = ((toolbar_left_margin, toolbar_top_margin),
+               (toolbar_left_margin+block_size[0]*len(toolbar),
+                toolbar_top_margin+block_size[1]))
+
 tools_in_table = []
-
-
-def load_tile_table():
-    tile_table = [[wall_img for _ in range(12)] for _ in range(12)]
-    return tile_table
 
 
 def get_obj_in_position(pos):
     x, y = pos
     if x >= table_rct[0][0] and x <= table_rct[1][0] and \
-            y >= table_rct[0][1] and y <= table_rct[1][1]:
+       y >= table_rct[0][1] and y <= table_rct[1][1]:
         return 'table'
-    else:
+    elif x >= toolbar_rct[0][0] and x <= toolbar_rct[1][0] and \
+            y >= toolbar_rct[0][1] and y <= toolbar_rct[1][1]:
         return 'tool'
+    else:
+        return None
 
 
 def get_tool_obj(pos):
-    return (pacman_img, pos)
+    x = pos[0]-toolbar_left_margin
+    return (toolbar[x//block_size[0]], pos)
 
 
 def render():
@@ -58,7 +68,10 @@ def render():
             if tile:
                 window.blit(
                     tile, (x*(block_size[0])+left_margin, y*(block_size[1])))
-
+    for x, tool in enumerate(toolbar):
+        window.blit(
+            tool, (x*block_size[0]+toolbar_left_margin,
+                   toolbar_top_margin))
     for tool in tools_in_table:
         window.blit(*tool)
 
@@ -98,21 +111,14 @@ def click(event):
 
 
 def run():
-    window.fill(white)
-    # draw tile
-    for x, row in enumerate(tile_table):
-        for y, tile in enumerate(row):
-            if tile:
-                window.blit(
-                    tile, (x*(block_size[0])+left_margin, y*(block_size[1])))
-
-    pygame.display.flip()
+    render()
     while True:
         for event in pygame.event.get():
             if event == pygame.QUIT:
                 exit(0)
             click(event)
         render()
+
 
 if __name__ == '__main__':
     run()
