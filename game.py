@@ -9,29 +9,22 @@ class Game(object):
         ...
     '''
 
-    def __init__(self, title: str, width: int, height: int, fps=60):
+    def __init__(self, title: str, size: (int, int), fps=60):
         self.title = title
-        self.width = width
-        self.height = height
+        self.size = size
         self.fps = fps
         self.surface = None
         self.clock = None
-        self.__map = None
-        self.__toolbox = None
+        self.tool_in_mouse = None
+        self.force_refresh = False
+        self.components = []
         self.__event_handlers = defaultdict(list)
+        self.__event_handlers[pygame.MOUSEBUTTONDOWN].append(self.drag_handler)
         self.__init_pygame()
 
-    def set_map(self, m: surfaces.Map):
-        self.__map = m
-
-    def set_toolbox(self, toolbox: surfaces.Toolbox):
-        self.__toolbox = toolbox
-
-    def __init_pygame(self):
-        pygame.init()
-        pygame.display.set_caption(self.title)
-        self.surface = pygame.display.set_mode((self.width, self.height))
-        self.clock = pygame.time.Clock()
+    def add_component(self, component: surfaces.Surface):
+        '''every component must have surface and rect'''
+        self.components.append(component)
 
     def enroll_event_handler(self,
                              event: int,
@@ -43,12 +36,37 @@ class Game(object):
         '''
         self.__event_handlers[event].append(handler)
 
-    def __event_handle(self):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                exit()
-            for handler in self.__event_handlers[event.type]:
-                handler(event)
+    def drag_handler(self, event):
+        assert event.type == pygame.MOUSEBUTTONDOWN
+        # click left
+        if event.button == 1:
+            mouse_pos = pygame.mouse.get_pos()
+            for cpt in self.components:
+                if cpt.rect.collidepoint(mouse_pos):
+                    # there is a tool in hand, put it down
+                    '''
+                    TODO:
+                    put down: 1. there is a tool already
+                              2. there can be placed a tool
+                    remove the tool in a pos
+                    '''
+                    if self.tool_in_mouse and isinstance(cpt, surfaces.Map):
+                        cpt.put_obj_in(mouse_pos, self.tool_in_mouse)
+                        self.tool_in_mouse = None
+                    # no tool in hand, pick up one
+                    if not self.tool_in_mouse and \
+                            isinstance(cpt, surfaces.Toolbox):
+                        self.tool_in_mouse = cpt.get_obj_in(mouse_pos)
+                        self.tool_in_mouse['rect'] = \
+                            self.tool_in_mouse['texture'].get_rect()
+                        print(self.tool_in_mouse)
+                    break
+        # click right
+        if event.button == 3:
+            # throw away tool in hand
+            if self.tool_in_mouse:
+                self.tool_in_mouse = None
+                self.force_refresh = True
 
     def run(self):
         '''start the game'''
@@ -57,25 +75,42 @@ class Game(object):
         while True:
             self.clock.tick(self.fps)
             self.__event_handle()
-            # draw map
-            left_margin = (self.width - self.__map.get_size()[0])//2
-            if self.__map.get_is_updated():
-                print('update map')
-                self.surface.blit(self.__map.get_surface(), (left_margin, 0))
-            # draw toolbox
-            left_margin = (self.width - self.__toolbox.get_size()[0])//2
-            top_margin = self.__map.get_size()[1] + 10
-            if self.__toolbox.get_is_updated():
-                print('update toolbox')
-                self.surface.blit(self.__toolbox.get_surface(),
-                                  (left_margin, top_margin))
+            # FIXME: delete this if there is no blank in surface
+            if self.tool_in_mouse or self.force_refresh:
+                self.surface.fill((255, 255, 255))
+            for cmpt in self.components:
+                # if there is a tool in mouse, then surface must be updated
+                if cmpt.is_updated or self.tool_in_mouse or self.force_refresh:
+                    print(cmpt, 'updated')
+                    self.surface.blit(cmpt.surface, cmpt.rect)
+                    cmpt.is_updated = False
+            # draw mouse
+            if self.tool_in_mouse:
+                self.tool_in_mouse['rect'].center = pygame.mouse.get_pos()
+                self.surface.blit(self.tool_in_mouse['texture'],
+                                  self.tool_in_mouse['rect'])
             pygame.display.flip()
+            self.force_refresh = False
+
+    def __init_pygame(self):
+        pygame.init()
+        pygame.display.set_caption(self.title)
+        self.surface = pygame.display.set_mode(self.size)
+        self.clock = pygame.time.Clock()
+
+    def __event_handle(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                exit()
+            for handler in self.__event_handlers[event.type]:
+                handler(event)
 
 
 if __name__ == '__main__':
-    game = Game('Feed the Dragon', 1000, 700, 30)
-    m = surfaces.Map('./level-1.map')
-    toolbox = surfaces.Toolbox('./level-1.toolbox')
-    game.set_map(m)
-    game.set_toolbox(toolbox)
+    size = (900, 800)
+    game = Game('Feed the Dragon', size, 30)
+    m = surfaces.Map('./level-1.map', (30, 10))
+    toolbox = surfaces.Toolbox('./level-1.toolbox', (30, 650))
+    game.add_component(m)
+    game.add_component(toolbox)
     game.run()
