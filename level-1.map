@@ -1,0 +1,35 @@
+[map]
+size = 12 9
+background-texture = background/colored_forest_croped.png
+map = ............
+      .....d......
+      ............
+      ............
+      wwwww.......
+      ............
+      h...........
+      ^^^^^^^^^^^^
+      $$$$$$$$$$$$
+
+[.]
+name = blank
+
+[^]
+name = grass
+texture = tiles/grassMid.png
+
+[$]
+name = rock
+texture = tiles/grassCenter.png
+
+[w]
+name = wall
+texture = tiles/castleCenter.png
+
+[h]
+name = hero
+texture = player/p1_front.png
+
+[d]
+name = dragon
+texture = enemies/blockerMad.png
