@@ -1,12 +1,6 @@
 import pygame
 import configparser
-import os
-
-
-def load_image(filename):
-    res_dir = './resources'
-    filepath = os.path.join(res_dir, filename)
-    return pygame.image.load(filepath).convert_alpha()
+from resources.resource import load_image
 
 
 class Surface(object):
@@ -119,6 +113,7 @@ class Toolbox(Surface):
         return self.tiles[self.tools[idx]]
 
     def render(self):
+        # TODO: init surface when create the object
         surface = pygame.Surface(self.size, pygame.SRCALPHA, 32)
         for i, c in enumerate(self.tools):
             if self.tiles[c]:
