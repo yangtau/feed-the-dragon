@@ -1,6 +1,7 @@
 import pygame
 import configparser
 from resources.resource import load_image
+import sprite
 
 
 class Surface(object):
@@ -12,6 +13,7 @@ class Surface(object):
 
 
 # TODO: updated in only one position
+#       add a block class
 #       add a tool class
 
 class Map(Surface):
@@ -57,9 +59,33 @@ class Map(Surface):
         for sec in parser.sections():
             if len(sec) == 1:
                 des = dict(parser.items(sec))
+                # TODO: DELETEME
+                if sec == 'h':
+                    # load position
+                    pos = tuple(map(lambda x: int(x)*self.tile_size,
+                                    des['position'].split(' ')))
+                    pos = (pos[1], pos[0])
+                    print(pos)
+                    self.sprite = sprite.Sprite(
+                        des['texture'], pos)
+                    self.sprite.move(x=pos[0]+600)
+                    continue
+
                 self.tiles[sec] = des
                 if 'texture' in des:
                     des['texture'] = load_image(des['texture'])
+
+    def update(self):
+        self.surface = self.origin_surface.copy()
+        surface = self.surface
+        self.sprite.draw(surface)
+        for i, row in enumerate(self.tools_on_map):
+            for j, tool in enumerate(row):
+                if tool:
+                    pos = (j*self.tile_size, i*self.tile_size)
+                    texture = tool['texture']
+                    self.surface.blit(texture, pos)
+        self.is_updated = True
 
     def render(self):
         self.is_updated = True
@@ -74,14 +100,13 @@ class Map(Surface):
                     if 'texture' in self.tiles[c]:
                         texture = self.tiles[c]['texture']
                         surface.blit(texture, pos)
-        for i, row in enumerate(self.tools_on_map):
-            for j, tool in enumerate(row):
-                if tool:
-                    pos = (j*self.tile_size, i*self.tile_size)
-                    texture = tool['texture']
-                    self.surface.blit(texture, pos)
         self.surface = surface.convert_alpha()
         self.rect = self.surface.get_rect()
+        self.origin_surface = self.surface.copy()
+
+    def search_the_way(self):
+        pass
+
 
 
 class Toolbox(Surface):

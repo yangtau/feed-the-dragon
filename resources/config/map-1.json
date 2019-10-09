@@ -1,0 +1,45 @@
+{
+  "map": {
+    "size": [
+      12,
+      9
+    ],
+    "background": "background/colored_forest_croped.png",
+    "map": [
+      "............",
+      "............",
+      "............",
+      "............",
+      "wwwww.......",
+      "............",
+      "............",
+      "^^^^^^^^^^^^",
+      "$$$$$$$$$$$$"
+    ],
+    "hero": {
+      "position": [0, 6],
+      "json": "conf/hero.json"
+    },
+    "dragon": {
+      "position": [5, 1],
+      "json": ""
+    },
+    "blocks": {
+      "^": {
+        "name": "grass",
+        "texture": "tiles/grassMid.png"
+      },
+      ".": {
+        "name": "blank"
+      },
+      "$": {
+        "name": "rock",
+        "texture": "tiles/grassCenter.png"
+      },
+      "w": {
+        "name": "wall",
+        "texture": "tiles/castleCenter.png"
+      }
+    }
+  }
+}

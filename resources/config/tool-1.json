@@ -1,0 +1,27 @@
+{
+  "toolbox": {
+    "size": [
+      4,
+      1
+    ],
+    "layout": "udlr",
+    "tools": {
+      "u": {
+        "name": "up",
+        "texture": "tools/up.png"
+      },
+      "d": {
+        "name": "down",
+        "texture": "tools/down.png"
+      },
+      "r": {
+        "name": "right",
+        "texture": "tools/right.png"
+      },
+      "l": {
+        "name": "left",
+        "texture": "tools/left.png"
+      }
+    }
+  }
+}

@@ -81,9 +81,10 @@ class Game(object):
             for cmpt in self.components:
                 # if there is a tool in mouse, then surface must be updated
                 if cmpt.is_updated or self.tool_in_mouse or self.force_refresh:
-                    print(cmpt, 'updated')
                     self.surface.blit(cmpt.surface, cmpt.rect)
                     cmpt.is_updated = False
+                    if isinstance(cmpt, surfaces.Map):
+                        cmpt.update()
             # draw mouse
             if self.tool_in_mouse:
                 self.tool_in_mouse['rect'].center = pygame.mouse.get_pos()
