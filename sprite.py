@@ -14,8 +14,10 @@ from resources.resource import load_image
     ...
 }
 '''
+
+
 class Sprite(object):
-    def __init__(self, filename: str, init_pos: (int, int)):
+    def __init__(self, filename: str):
         self.img = self.load_file(filename)
         self.size = (70, 70)  # TODO: load it from file
         self.surface = pygame.Surface(self.size, pygame.SRCALPHA, 32)
@@ -53,3 +55,13 @@ class Sprite(object):
 
     def load_file(self, filename: str):
         return load_image(filename)
+
+
+class Hero(Sprite):
+    def __init__(self, config: str, position: (int, int)):
+        pass
+
+
+class Dragon(Sprite):
+    def __init__(self, config: str, position: (int, int)):
+        pass

@@ -4,6 +4,10 @@
       12,
       9
     ],
+    "tile_size": [
+      64,
+      64
+    ],
     "background": "background/colored_forest_croped.png",
     "map": [
       "............",
@@ -16,15 +20,7 @@
       "^^^^^^^^^^^^",
       "$$$$$$$$$$$$"
     ],
-    "hero": {
-      "position": [0, 6],
-      "json": "conf/hero.json"
-    },
-    "dragon": {
-      "position": [5, 1],
-      "json": ""
-    },
-    "blocks": {
+    "tiles": {
       "^": {
         "name": "grass",
         "texture": "tiles/grassMid.png"
@@ -41,5 +37,19 @@
         "texture": "tiles/castleCenter.png"
       }
     }
+  },
+  "hero": {
+    "position": [
+      0,
+      6
+    ],
+    "json": "conf/hero.json"
+  },
+  "dragon": {
+    "position": [
+      5,
+      1
+    ],
+    "json": ""
   }
 }

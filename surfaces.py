@@ -1,150 +1,169 @@
 import pygame
-import configparser
-from resources.resource import load_image
 import sprite
+from resources.resource import load_image
+import json
 
 
-class Surface(object):
-    def __init__(self):
-        self.size = (0, 0)
-        self.is_updated = True
-        self.rect = None
-        self.surface = None
+class Tile(object):
+    '''Tile
+    Attr:
+        texture
+        is_block
+    '''
+   def __init__(self, attr: dict):
+        # Note: only if the name field in config file is `blank`,
+        #       the tile is not a block.
+        self.__is_block = attr['name'] != 'blank'
+        if not self.__is_block:
+            self.__texture = load_image(attr['texture'])
+        else:
+            self.__texture = None
+
+    @property
+    def texture(self):
+        return self.__texture
+
+    @property
+    def is_block(self):
+        return self.__is_block
 
 
-# TODO: updated in only one position
-#       add a block class
-#       add a tool class
+class Tool(object):
+    '''Tool
+    Attr:
+        texture
+        name
+    Method:
+        inc_count
+        dec_count
+    '''
+    def __init__(self, attr: dict):
+        self.__texture = load_image(attr['texture'])
+        self.__name = attr['name']
+        self.__count = attr['number']
 
-class Map(Surface):
-    def __init__(self, filename: str, pos: tuple):
-        super().__init__()
-        self.tiles = {}
-        self.map = []
-        self.tile_size = 70
-        self.load_map_file(filename)
-        self.tools_on_map = [[None for _ in range(
-            len(self.map[0]))] for _ in range(len(self.map))]
-        self.render()
-        self.rect.move_ip(*pos)
+    @property
+    def texture(self):
+        return self.__texture
 
-    def get_obj_in(self, pos):
-        rel_pos = (pos[0]-self.rect.left, pos[1]-self.rect.top)
-        idx_x = (rel_pos[0])//self.tile_size
-        idx_y = (rel_pos[1])//self.tile_size
-        return self.tiles[self.map[idx_y][idx_x]]
+    @property
+    def name(self):
+        return self.__name
 
-    def put_obj_in(self, pos, tool):
-        rel_pos = (pos[0]-self.rect.left, pos[1]-self.rect.top)
-        idx_x = (rel_pos[0])//self.tile_size
-        idx_y = (rel_pos[1])//self.tile_size
-        print('put down', (idx_x, idx_y))
-        self.tools_on_map[idx_y][idx_x] = tool
-        # render
-        self.is_updated = True
-        texture = tool['texture']
-        size = texture.get_size()
-        offset = (self.tile_size - size[0]) // 2
-        pos = (idx_x*self.tile_size+offset, idx_y*self.tile_size+offset)
-        self.surface.blit(texture, pos)
+    def inc_count(self):
+        self.__count += 1
 
-    def load_map_file(self, filename: str):
-        parser = configparser.ConfigParser()
-        parser.read(filename)
-        self.map = parser.get('map', 'map').split('\n')
-        self.size = tuple(map(lambda x: int(x)*self.tile_size,
-                              parser.get('map', 'size').split(' ')))
-        self.background = load_image(parser.get('map', 'background-texture'))
-        # tile
-        for sec in parser.sections():
-            if len(sec) == 1:
-                des = dict(parser.items(sec))
-                # TODO: DELETEME
-                if sec == 'h':
-                    # load position
-                    pos = tuple(map(lambda x: int(x)*self.tile_size,
-                                    des['position'].split(' ')))
-                    pos = (pos[1], pos[0])
-                    print(pos)
-                    self.sprite = sprite.Sprite(
-                        des['texture'], pos)
-                    self.sprite.move(x=pos[0]+600)
-                    continue
+    def dec_count(self):
+        self.__count -= 1
 
-                self.tiles[sec] = des
-                if 'texture' in des:
-                    des['texture'] = load_image(des['texture'])
 
-    def update(self):
-        self.surface = self.origin_surface.copy()
-        surface = self.surface
-        self.sprite.draw(surface)
-        for i, row in enumerate(self.tools_on_map):
+class Map(object):
+    '''Map
+    attr:
+        __map: two-dimensional list of tiles
+        __static_surf: background and tiles. Copy it before drawing.
+        __tools_on_map: two-dimensional list of tools in the map
+        __size: the scale of __map
+        __background: pygame image of background
+        __tile_size: size of tile
+        __hero:
+        __dragon:
+        __hero_position:
+        __dragon_position:
+    mothed:
+        __load_config: load json configuration file
+        __render_static: render background and tiles
+        draw:
+    '''
+
+    def __init__(self, config: str):
+        self.__map = []
+        self.__load_config(config)
+        self.__tools_on_map = [[None for _ in range(self.__size[0])
+                                for _ in range(self.__size[1])]]
+        # static_surf will never change
+        self.__static_surf = self.__render_static()
+
+    @property
+    def surface_size(self):
+        return (self.__size[0] * self.__tile_size[0],
+                self.__size[1] * self.__tile_size[1])
+
+    def __load_config(self, config: str):
+        with open(config) as f:
+            data = json.load(f)
+        self.__size = tuple(data['size'])
+        self.__tile_size = tuple(data['tile_size'])
+        self.__background = load_image(data['background'])
+        # tiles
+        tiles = data['tiles']
+        for k, v in tiles.items():
+            tiles[k] = Tile(v)
+        for row in data['map']:
+            self.__map.append([tiles[c] for c in row])
+        # hero
+        self.__hero_position = tuple(data['hero']['position'])
+        self.__hero = sprite.Hero(data['hero']['json'], self.__hero_position)
+        # dragon
+        self.__dragon_position = tuple(data['dragon']['position'])
+        self.__dragon = sprite.Dragon(
+            data['dragon']['json'], self.__dragon_position)
+
+    def put_tool(self, position: (int, int), tool: Tool):
+        '''Put the tool in the position
+        Arg:
+            position: the relative position in the map
+        '''
+        idx_x = (position[0])//self.__tile_size[0]
+        idx_y = (position[1])//self.__tile_size[0]
+        self.__tools_on_map[idx_y][idx_x] = tool
+
+    def remove_tool(self, position: (int, int)):
+        idx_x = (position[0])//self.__tile_size[0]
+        idx_y = (position[1])//self.__tile_size[0]
+        self.__tools_on_map[idx_y][idx_x] = None
+
+    def __render_static(self):
+        surface = pygame.Surface(self.surface_size, pygame.SRCALPHA, 32)
+        # draw background
+        background_size = self.__background.get_size()
+        surface.blit(self.__background,
+                     (0, self.surface_size[1]-background_size[1]))
+        # draw tiles
+        for i, row in enumerate(self.__map):
+            for j, tile in enumerate(row):
+                position = (j*self.__tile_size[0], i*self.__tile_size[1])
+                if tile.texture:
+                    surface.blit(tile.texture, position)
+        return surface
+
+    def draw(self, surface: pygame.Surface, position: (int, int)):
+        map_surf = self.__static_surf.copy()
+        # draw tools
+        for i, row in enumerate(self.__tools_on_map):
             for j, tool in enumerate(row):
                 if tool:
-                    pos = (j*self.tile_size, i*self.tile_size)
-                    texture = tool['texture']
-                    self.surface.blit(texture, pos)
-        self.is_updated = True
+                    position = (j*self.__tile_size[0], i*self.__tile_size[1])
+                    map_surf.blit(tool.texture, position)
+        # draw hero and dragon
+        self.__hero.draw(map_surf)
+        self.__dragon.draw(map_surf)
+        surface.blit(map_surf, position)
 
-    def render(self):
-        self.is_updated = True
-        surface = pygame.Surface(self.size, pygame.SRCALPHA, 32)
-        # draw background
-        size = self.background.get_size()
-        surface.blit(self.background, (0, self.size[1]-size[1]))
-        for i, row in enumerate(self.map):
-            for j, c in enumerate(row):
-                if self.tiles[c]:
-                    pos = (j*self.tile_size, i*self.tile_size)
-                    if 'texture' in self.tiles[c]:
-                        texture = self.tiles[c]['texture']
-                        surface.blit(texture, pos)
-        self.surface = surface.convert_alpha()
-        self.rect = self.surface.get_rect()
-        self.origin_surface = self.surface.copy()
-
-    def search_the_way(self):
+    def go_hero(self):
+        '''a bad mothed name'''
         pass
 
 
+class Toolbox(object):
+    def __init__(self, filename: str):
+        pass
 
-class Toolbox(Surface):
-    def __init__(self, filename: str, pos: tuple):
-        super().__init__()
-        self.tiles = {}
-        self.tile_size = 70
-        self.load_toolbox_file(filename)
-        self.render()
-        self.rect.move_ip(*pos)
+    def __load_config_file(self, filename: str):
+        pass
 
-    def load_toolbox_file(self, filename: str):
-        parser = configparser.ConfigParser()
-        parser.read(filename)
-        self.tools = parser.get('toolbox', 'tools')
-        self.size = tuple(map(lambda x: int(x)*self.tile_size,
-                              parser.get('toolbox', 'size').split(' ')))
-        # tiles
-        for sec in parser.sections():
-            if len(sec) == 1:
-                des = dict(parser.items(sec))
-                self.tiles[sec] = des
-                if 'texture' in des:
-                    des['texture'] = load_image(des['texture'])
-
-    def get_obj_in(self, pos):
-        rel_pos = (pos[0]-self.rect.left, pos[1]-self.rect.top)
-        idx = (rel_pos[0])//self.tile_size
+    def get_tool(self, position):
         return self.tiles[self.tools[idx]]
 
-    def render(self):
-        # TODO: init surface when create the object
-        surface = pygame.Surface(self.size, pygame.SRCALPHA, 32)
-        for i, c in enumerate(self.tools):
-            if self.tiles[c]:
-                pos = (i*self.tile_size, 0)
-                if 'texture' in self.tiles[c]:
-                    texture = self.tiles[c]['texture']
-                    surface.blit(texture, pos)
-        self.surface = surface.convert_alpha()
-        self.rect = self.surface.get_rect()
+    def __render(self):
+        pass 
