@@ -1,0 +1,30 @@
+{
+  "number": 4,
+  "tool_size": [
+    64,
+    64
+  ],
+  "toolbox": "udlr",
+  "tools": {
+    "u": {
+      "name": "up",
+      "texture": "tools/up.png",
+      "number": 4
+    },
+    "d": {
+      "name": "down",
+      "texture": "tools/down.png",
+      "number": 4
+    },
+    "r": {
+      "name": "right",
+      "texture": "tools/right.png",
+      "number": 4
+    },
+    "l": {
+      "name": "left",
+      "texture": "tools/left.png",
+      "number": 4
+    }
+  }
+}

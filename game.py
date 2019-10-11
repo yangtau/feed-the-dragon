@@ -17,14 +17,15 @@ class Game(object):
         self.clock = None
         self.tool_in_mouse = None
         self.force_refresh = False
-        self.components = []
         self.__event_handlers = defaultdict(list)
         self.__event_handlers[pygame.MOUSEBUTTONDOWN].append(self.drag_handler)
         self.__init_pygame()
 
-    def add_component(self, component: surfaces.Surface):
-        '''every component must have surface and rect'''
-        self.components.append(component)
+    def set_map(self, m: surfaces.Map):
+        self.__map = m
+
+    def set_toolbox(self, toolbox: surfaces.Toolbox):
+        self.__toolbox = toolbox
 
     def enroll_event_handler(self,
                              event: int,
@@ -41,26 +42,19 @@ class Game(object):
         # click left
         if event.button == 1:
             mouse_pos = pygame.mouse.get_pos()
-            for cpt in self.components:
-                if cpt.rect.collidepoint(mouse_pos):
-                    # there is a tool in hand, put it down
-                    '''
-                    TODO:
-                    put down: 1. there is a tool already
-                              2. there can be placed a tool
-                    remove the tool in a pos
-                    '''
-                    if self.tool_in_mouse and isinstance(cpt, surfaces.Map):
-                        cpt.put_obj_in(mouse_pos, self.tool_in_mouse)
-                        self.tool_in_mouse = None
-                    # no tool in hand, pick up one
-                    if not self.tool_in_mouse and \
-                            isinstance(cpt, surfaces.Toolbox):
-                        self.tool_in_mouse = cpt.get_obj_in(mouse_pos)
-                        self.tool_in_mouse['rect'] = \
-                            self.tool_in_mouse['texture'].get_rect()
-                        print(self.tool_in_mouse)
-                    break
+            if self.__map.rect.collidepoint(mouse_pos):
+                if self.tool_in_mouse:
+                    # put down a tool
+                    # TODO: what if there is already a tool in the mouse_pos
+                    self.__map.put_tool(mouse_pos, self.tool_in_mouse)
+                    self.tool_in_mouse = None
+                else:
+                    # remove tool
+                    self.__map.remove_tool(mouse_pos)
+            if self.__toolbox.rect.collidepoint(mouse_pos):
+                if not self.tool_in_mouse:
+                    self.tool_in_mouse = self.__toolbox.get_tool(mouse_pos)
+                    self.tool_in_mouse.rect = self.tool_in_mouse.texture.get_rect()
         # click right
         if event.button == 3:
             # throw away tool in hand
@@ -75,21 +69,16 @@ class Game(object):
         while True:
             self.clock.tick(self.fps)
             self.__event_handle()
-            # FIXME: delete this if there is no blank in surface
             if self.tool_in_mouse or self.force_refresh:
                 self.surface.fill((255, 255, 255))
-            for cmpt in self.components:
-                # if there is a tool in mouse, then surface must be updated
-                if cmpt.is_updated or self.tool_in_mouse or self.force_refresh:
-                    self.surface.blit(cmpt.surface, cmpt.rect)
-                    cmpt.is_updated = False
-                    if isinstance(cmpt, surfaces.Map):
-                        cmpt.update()
+            # TODO: position
+            self.__map.draw(self.surface)
+            self.__toolbox.draw(self.surface)
             # draw mouse
             if self.tool_in_mouse:
-                self.tool_in_mouse['rect'].center = pygame.mouse.get_pos()
-                self.surface.blit(self.tool_in_mouse['texture'],
-                                  self.tool_in_mouse['rect'])
+                self.tool_in_mouse.rect.center = pygame.mouse.get_pos()
+                self.surface.blit(self.tool_in_mouse.texture,
+                                  self.tool_in_mouse.rect)
             pygame.display.flip()
             self.force_refresh = False
 
@@ -108,10 +97,10 @@ class Game(object):
 
 
 if __name__ == '__main__':
-    size = (900, 800)
+    size = (808, 700)
     game = Game('Feed the Dragon', size, 30)
-    m = surfaces.Map('./level-1.map', (30, 10))
-    toolbox = surfaces.Toolbox('./level-1.toolbox', (30, 650))
-    game.add_component(m)
-    game.add_component(toolbox)
+    m = surfaces.Map('config/map-1.json', (20, 20))
+    game.set_map(m)
+    toolbox = surfaces.Toolbox('config/toolbox-1.json', (20, 616))
+    game.set_toolbox(toolbox)
     game.run()

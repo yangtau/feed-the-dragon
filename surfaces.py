@@ -1,7 +1,7 @@
 import pygame
 import sprite
 from resources.resource import load_image
-import json
+from resources.resource import load_json
 
 
 class Tile(object):
@@ -10,11 +10,12 @@ class Tile(object):
         texture
         is_block
     '''
-   def __init__(self, attr: dict):
+
+    def __init__(self, attr: dict):
         # Note: only if the name field in config file is `blank`,
         #       the tile is not a block.
         self.__is_block = attr['name'] != 'blank'
-        if not self.__is_block:
+        if self.__is_block:
             self.__texture = load_image(attr['texture'])
         else:
             self.__texture = None
@@ -37,6 +38,7 @@ class Tool(object):
         inc_count
         dec_count
     '''
+
     def __init__(self, attr: dict):
         self.__texture = load_image(attr['texture'])
         self.__name = attr['name']
@@ -57,7 +59,15 @@ class Tool(object):
         self.__count -= 1
 
 
-class Map(object):
+class Surface(object):
+    def __init__(self):
+        pass
+
+    def get_relative_position(self, position):
+        return (position[0] - self.rect.left, position[1] - self.rect.top)
+
+
+class Map(Surface):
     '''Map
     attr:
         __map: two-dimensional list of tiles
@@ -76,13 +86,19 @@ class Map(object):
         draw:
     '''
 
-    def __init__(self, config: str):
+    def __init__(self, config: str, position: (int, int)):
         self.__map = []
         self.__load_config(config)
-        self.__tools_on_map = [[None for _ in range(self.__size[0])
-                                for _ in range(self.__size[1])]]
+        self.__tools_on_map = [[None for _ in range(self.__size[0])]
+                               for _ in range(self.__size[1])]
         # static_surf will never change
         self.__static_surf = self.__render_static()
+        self.__rect = self.__static_surf.get_rect()
+        self.__rect.move_ip(position)
+
+    @property
+    def rect(self) -> pygame.Rect:
+        return self.__rect
 
     @property
     def surface_size(self):
@@ -90,8 +106,7 @@ class Map(object):
                 self.__size[1] * self.__tile_size[1])
 
     def __load_config(self, config: str):
-        with open(config) as f:
-            data = json.load(f)
+        data = load_json(config)
         self.__size = tuple(data['size'])
         self.__tile_size = tuple(data['tile_size'])
         self.__background = load_image(data['background'])
@@ -111,16 +126,16 @@ class Map(object):
 
     def put_tool(self, position: (int, int), tool: Tool):
         '''Put the tool in the position
-        Arg:
-            position: the relative position in the map
         '''
-        idx_x = (position[0])//self.__tile_size[0]
-        idx_y = (position[1])//self.__tile_size[0]
+        relative_pos = self.get_relative_position(position)
+        idx_x = (relative_pos[0])//self.__tile_size[0]
+        idx_y = (relative_pos[1])//self.__tile_size[1]
         self.__tools_on_map[idx_y][idx_x] = tool
 
     def remove_tool(self, position: (int, int)):
-        idx_x = (position[0])//self.__tile_size[0]
-        idx_y = (position[1])//self.__tile_size[0]
+        relative_pos = self.get_relative_position(position)
+        idx_x = (relative_pos[0])//self.__tile_size[0]
+        idx_y = (relative_pos[1])//self.__tile_size[1]
         self.__tools_on_map[idx_y][idx_x] = None
 
     def __render_static(self):
@@ -133,11 +148,11 @@ class Map(object):
         for i, row in enumerate(self.__map):
             for j, tile in enumerate(row):
                 position = (j*self.__tile_size[0], i*self.__tile_size[1])
-                if tile.texture:
+                if tile.is_block:
                     surface.blit(tile.texture, position)
         return surface
 
-    def draw(self, surface: pygame.Surface, position: (int, int)):
+    def draw(self, surface: pygame.Surface):
         map_surf = self.__static_surf.copy()
         # draw tools
         for i, row in enumerate(self.__tools_on_map):
@@ -146,24 +161,53 @@ class Map(object):
                     position = (j*self.__tile_size[0], i*self.__tile_size[1])
                     map_surf.blit(tool.texture, position)
         # draw hero and dragon
+        '''
         self.__hero.draw(map_surf)
         self.__dragon.draw(map_surf)
-        surface.blit(map_surf, position)
+        '''
+        surface.blit(map_surf, self.__rect)
 
     def go_hero(self):
         '''a bad mothed name'''
         pass
 
 
-class Toolbox(object):
-    def __init__(self, filename: str):
-        pass
+class Toolbox(Surface):
+    def __init__(self, config: str, position: (int, int)):
+        self.__load_config(config)
+        self.__static_surf = self.__render__static()
+        self.__rect = self.__static_surf.get_rect()
+        self.__rect.move_ip(position)
 
-    def __load_config_file(self, filename: str):
-        pass
+    @property
+    def rect(self) -> pygame.Rect:
+        return self.__rect
 
-    def get_tool(self, position):
-        return self.tiles[self.tools[idx]]
+    def __load_config(self, config: str):
+        data = load_json(config)
+        self.__number = data['number']
+        self.__tool_size = tuple(data['tool_size'])
+        tools = data['tools']
+        for k, v in tools.items():
+            tools[k] = Tool(v)
+        self.__toolbox = [tools[c] for c in data['toolbox']]
 
-    def __render(self):
-        pass 
+    def get_tool(self, position: (int, int)) -> Tool:
+        '''return the tool in the position
+        '''
+        relative_pos = self.get_relative_position(position)
+        idx = relative_pos[0] // self.__tool_size[0]
+        return self.__toolbox[idx]
+
+    @property
+    def surface_size(self):
+        return (self.__tool_size[0] * self.__number, self.__tool_size[1])
+
+    def __render__static(self):
+        surface = pygame.Surface(self.surface_size, pygame.SRCALPHA, 32)
+        for i, tool in enumerate(self.__toolbox):
+            surface.blit(tool.texture, (i * self.__tool_size[0], 0))
+        return surface.convert_alpha()
+
+    def draw(self, surface: pygame.Surface):
+        surface.blit(self.__static_surf, self.__rect)
