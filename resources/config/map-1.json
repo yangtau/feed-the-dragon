@@ -41,13 +41,13 @@
       0,
       6
     ],
-    "json": "conf/hero.json"
+    "json": "hero/character.json"
   },
   "dragon": {
     "position": [
       5,
       1
     ],
-    "json": ""
+    "json": "zombie/character.json"
   }
 }

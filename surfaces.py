@@ -49,7 +49,7 @@ class Tool(object):
         return self.__texture
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self.__name
 
     def inc_count(self):
@@ -61,6 +61,7 @@ class Tool(object):
 
 class Surface(object):
     def __init__(self):
+        self.rect = None
         pass
 
     def get_relative_position(self, position):
