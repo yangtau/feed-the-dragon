@@ -4,6 +4,10 @@ from resources.resource import load_image
 from resources.resource import load_json
 
 
+def vec_mul(a, b):
+    return (a[0] * b[0], a[1] * b[1])
+
+
 class Tile(object):
     '''Tile
     Attr:
@@ -96,6 +100,9 @@ class Map(Surface):
         self.__static_surf = self.__render_static()
         self.__rect = self.__static_surf.get_rect()
         self.__rect.move_ip(position)
+        '''TODO: delete me
+        self.__hero.pose = 'walk'
+        '''
 
     @property
     def rect(self) -> pygame.Rect:
@@ -118,12 +125,16 @@ class Map(Surface):
         for row in data['map']:
             self.__map.append([tiles[c] for c in row])
         # hero
-        self.__hero_position = tuple(data['hero']['position'])
-        self.__hero = sprite.Hero(data['hero']['json'], self.__hero_position)
+        self.__hero_position = vec_mul(
+            tuple(data['hero']['position']), self.__tile_size)
+        self.__hero = sprite.Hero(
+            self.__tile_size, self.__hero_position, data['hero']['json'])
         # dragon
-        self.__dragon_position = tuple(data['dragon']['position'])
+        self.__dragon_position = vec_mul(
+            tuple(data['dragon']['position']), self.__tile_size)
+
         self.__dragon = sprite.Dragon(
-            data['dragon']['json'], self.__dragon_position)
+            self.__tile_size, self.__dragon_position, data['dragon']['json'])
 
     def put_tool(self, position: (int, int), tool: Tool):
         '''Put the tool in the position
@@ -162,10 +173,8 @@ class Map(Surface):
                     position = (j*self.__tile_size[0], i*self.__tile_size[1])
                     map_surf.blit(tool.texture, position)
         # draw hero and dragon
-        '''
         self.__hero.draw(map_surf)
         self.__dragon.draw(map_surf)
-        '''
         surface.blit(map_surf, self.__rect)
 
     def go_hero(self):
