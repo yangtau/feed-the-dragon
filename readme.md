@@ -1,12 +1,11 @@
 # Feed the Dragon
 
+![](/yangtau/feed-the-dragon/blob/master/docs/ulm.jpg?raw=true)
+
 ## TODO
 
-- [ ] Sprite 移动效果
-- [ ] 道具粒子特效
-- [ ] UI 设计实现（开始游戏界面，设置界面，界面按钮等等）
-- [ ] 游戏地图编辑器
-- [ ] 更好的游戏贴图
+- [ ] UI 设计实现，查看 Issue #1
+- [ ] 游戏地图编辑，查看 Issue #2
+- [ ] 游戏素材: 贴图，声音
 - [ ] 测试
-- [ ] 文档
 
