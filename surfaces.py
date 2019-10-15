@@ -1,6 +1,6 @@
 import pygame
 from queue import Queue
-import sprite
+import sprites
 from resources.resource import load_image
 from resources.resource import load_json
 
@@ -107,6 +107,7 @@ class Map(Surface):
 
     def __init__(self, config: str, position: (int, int)):
         self.__map = []
+        self.__group = pygame.sprite.Group()
         self.__load_config(config)
         self.__tools_on_map = [[None for _ in range(self.__size[0])]
                                for _ in range(self.__size[1])]
@@ -139,26 +140,29 @@ class Map(Surface):
         for row in data['map']:
             self.__map.append([tiles[c] for c in row])
         # TODO: abstract
-        # sprites
-        sprites = data['sprites']
+        # roles
+        roles = data['sprites']
         # hero
-        self.__hero_idx_pos = tuple(sprites['hero']['position'])
+        self.__hero_idx_pos = tuple(roles['hero']['position'])
         self.__hero_position = pair_mul(self.__hero_idx_pos, self.__tile_size)
-        self.__hero = sprite.Hero(
-            self.__tile_size, self.__hero_position, sprites['hero']['json'])
+        self.__hero = sprites.Hero(
+            self.__tile_size, self.__hero_position, roles['hero']['json'])
         # dragon
-        self.__dragon_idx_pos = tuple(sprites['dragon']['position'])
+        self.__dragon_idx_pos = tuple(roles['dragon']['position'])
         self.__dragon_position = pair_mul(
             self.__dragon_idx_pos, self.__tile_size)
-        self.__dragon = sprite.Dragon(
-            self.__tile_size, self.__dragon_position, sprites['dragon']['json'])
+        self.__dragon = sprites.Dragon(
+            self.__tile_size, self.__dragon_position, roles['dragon']['json'])
         # princess
-        self.__princess_idx_pos = tuple(sprites['princess']['position'])
+        self.__princess_idx_pos = tuple(roles['princess']['position'])
         self.__princess_position = pair_mul(
             self.__princess_idx_pos, self.__tile_size)
-        self.__princess = sprite.Sprite(
-            self.__tile_size, self.__princess_position, sprites['princess']['json']
+        self.__princess = sprites.Sprite(
+            self.__tile_size, self.__princess_position, roles['princess']['json']
         )
+        self.__group.add(self.__hero)
+        self.__group.add(self.__princess)
+        self.__group.add(self.__dragon)
 
     def put_tool(self, position: (int, int), tool: Tool):
         '''Put the tool in the position'''
@@ -195,10 +199,13 @@ class Map(Surface):
                 if tool:
                     position = (j*self.__tile_size[0], i*self.__tile_size[1])
                     map_surf.blit(tool.texture, position)
-        # draw the hero and the dragon
+        '''
         self.__hero.draw(map_surf)
         self.__dragon.draw(map_surf)
         self.__princess.draw(map_surf)
+        '''
+        self.__group.draw(map_surf)
+        self.__group.update()
         surface.blit(map_surf, self.__rect)
 
     def find_the_way(self):
@@ -260,11 +267,13 @@ class Map(Surface):
             for f, pos in tra:
                 que.put((f, pos, front))
                 visited.add(pos)
+
         def print_res(res):
             f, p, pre = res
             if pre:
                 print_res(pre)
             print((f, p))
+            self.__hero.move(2, *pair_mul(p, self.__tile_size))
         print_res(res)
 
 

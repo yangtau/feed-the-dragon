@@ -1,29 +1,18 @@
 import pygame
+from queue import Queue
 from collections import defaultdict
 from resources.resource import load_image
 from resources.resource import load_json
 
 
-'''
-{
-    "png": "relative/path/to/png",
-    "actions": {
-        "walk": [
-            {"x":, "y", "height":, "width"},
-            {...},
-            ...
-        ],
-        ...
-    }
-}
-'''
-
-
-class Sprite(object):
+class Sprite(pygame.sprite.Sprite):
     default_pos = 'idle'
     frame_num_cnt_increment = 0.2
 
+    # TODO: normalize the size of sprites, and remove the size argu
     def __init__(self, size: (int, int), position: (int, int), config: str):
+        # super.__init__(self)
+        pygame.sprite.Sprite.__init__(self)
         self.__frames = defaultdict(list)
         self.__size = size
         self.__load_config_file(config)
@@ -34,6 +23,10 @@ class Sprite(object):
         self.__to_x, self.__to_y = position
         self.__rect.move_ip(position)
         self.__frame_num_cnt = 0.1
+        self.__actions_que = Queue()
+
+    def add_action(self, action):
+        self.__actions_que.put(action)
 
     @property
     def pose(self):
@@ -44,6 +37,14 @@ class Sprite(object):
         if pose not in self.__frames_desc:
             raise Exception('No such pose: %s' % pose)
         self.__pose = pose
+
+    @property
+    def rect(self):
+        return self.__rect
+
+    @property
+    def image(self):
+        return self.__current_frame
 
     def __load_config_file(self, config: str):
         data = load_json(config)
@@ -78,8 +79,6 @@ class Sprite(object):
         return self.__frames[name][mod]
 
     def move(self, speed: int, x=None, y=None):
-        assert (x is not None or y is not None) and not (
-            x is not None and y is not None)
         if x:
             self.__to_x = x
         else:
@@ -90,7 +89,7 @@ class Sprite(object):
             self.__to_y = self.__rect.top
         self.__speed = speed
 
-    def draw(self, surface):
+    def update(self):
         if self.__to_x != self.__rect.left:
             self.__rect.left += self.__get_speed(self.__rect.left, self.__to_x)
         if self.__to_y != self.__rect.top:
@@ -100,7 +99,6 @@ class Sprite(object):
         self.__current_frame_num = int(self.__frame_num_cnt)
         self.__current_frame = self.get_frame(
             self.pose, self.__current_frame_num)
-        surface.blit(self.__current_frame, self.__rect)
 
     def __get_speed(self, from_p, to_p):
         speed = self.__speed
