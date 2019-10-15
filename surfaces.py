@@ -1,10 +1,26 @@
 import pygame
+from queue import Queue
 import sprite
 from resources.resource import load_image
 from resources.resource import load_json
 
 
-def vec_mul(a, b):
+'''
++-----> X
+|
+|
+|
+V Y
+
+index_position, position: (X, Y)
+    index_position: the index of the block in the map
+    position: the relative position represented in pixel in the map 
+
+size, pixel_size
+'''
+
+
+def pair_mul(a, b):
     return (a[0] * b[0], a[1] * b[1])
 
 
@@ -82,13 +98,11 @@ class Map(Surface):
         __background: pygame image of background
         __tile_size: size of tile
         __hero:
-        __dragon:
-        __hero_position:
-        __dragon_position:
-    mothed:
-        __load_config: load json configuration file
-        __render_static: render background and tiles
-        draw:
+        __dragon: 
+    mothed: 
+        __load_config: load json configuration file 
+        __render_static: render background and tiles 
+        draw: 
     '''
 
     def __init__(self, config: str, position: (int, int)):
@@ -100,9 +114,9 @@ class Map(Surface):
         self.__static_surf = self.__render_static()
         self.__rect = self.__static_surf.get_rect()
         self.__rect.move_ip(position)
-        '''TODO: delete me
+        # TODO: delete me
         self.__hero.pose = 'walk'
-        '''
+        self.find_the_way()
 
     @property
     def rect(self) -> pygame.Rect:
@@ -124,21 +138,30 @@ class Map(Surface):
             tiles[k] = Tile(v)
         for row in data['map']:
             self.__map.append([tiles[c] for c in row])
+        # TODO: abstract
+        # sprites
+        sprites = data['sprites']
         # hero
-        self.__hero_position = vec_mul(
-            tuple(data['hero']['position']), self.__tile_size)
+        self.__hero_idx_pos = tuple(sprites['hero']['position'])
+        self.__hero_position = pair_mul(self.__hero_idx_pos, self.__tile_size)
         self.__hero = sprite.Hero(
-            self.__tile_size, self.__hero_position, data['hero']['json'])
+            self.__tile_size, self.__hero_position, sprites['hero']['json'])
         # dragon
-        self.__dragon_position = vec_mul(
-            tuple(data['dragon']['position']), self.__tile_size)
-
+        self.__dragon_idx_pos = tuple(sprites['dragon']['position'])
+        self.__dragon_position = pair_mul(
+            self.__dragon_idx_pos, self.__tile_size)
         self.__dragon = sprite.Dragon(
-            self.__tile_size, self.__dragon_position, data['dragon']['json'])
+            self.__tile_size, self.__dragon_position, sprites['dragon']['json'])
+        # princess
+        self.__princess_idx_pos = tuple(sprites['princess']['position'])
+        self.__princess_position = pair_mul(
+            self.__princess_idx_pos, self.__tile_size)
+        self.__princess = sprite.Sprite(
+            self.__tile_size, self.__princess_position, sprites['princess']['json']
+        )
 
     def put_tool(self, position: (int, int), tool: Tool):
-        '''Put the tool in the position
-        '''
+        '''Put the tool in the position'''
         relative_pos = self.get_relative_position(position)
         idx_x = (relative_pos[0])//self.__tile_size[0]
         idx_y = (relative_pos[1])//self.__tile_size[1]
@@ -172,14 +195,77 @@ class Map(Surface):
                 if tool:
                     position = (j*self.__tile_size[0], i*self.__tile_size[1])
                     map_surf.blit(tool.texture, position)
-        # draw hero and dragon
+        # draw the hero and the dragon
         self.__hero.draw(map_surf)
         self.__dragon.draw(map_surf)
+        self.__princess.draw(map_surf)
         surface.blit(map_surf, self.__rect)
 
-    def go_hero(self):
-        '''a bad mothed name'''
-        pass
+    def find_the_way(self):
+        '''find the way that the hero should go'''
+        start = self.__hero_idx_pos
+        end = self.__princess_idx_pos
+        m = self.__map
+        que = Queue()
+        visited = set()
+        que.put((None, start, None))
+        visited.add(start)
+        for row in self.__map:
+            for t in row:
+                if t.is_block:
+                    print('#', end='')
+                else:
+                    print('0', end='')
+            print()
+
+        def trans(state):
+            res = []
+            size = self.__size
+            x, y = state
+            # Case 1: walk
+            # right
+            if x+1 < size[0] and not m[y][x+1].is_block and m[y+1][x+1].is_block:
+                res.append(('walk', (x+1, y)))
+            # left
+            if x-1 >= 0 and not m[y][x-1].is_block and m[y+1][x-1].is_block:
+                res.append(('walk', (x-1, y)))
+            # Case 2: jump
+            for i in range(y, 0, -1):
+                # top of current cell should be empty
+                if m[i-1][x].is_block:
+                    break
+                # top of the block that hero jump to, should be empty
+                if x+1 < size[0] and m[i][x+1].is_block and not m[i-1][x+1].is_block:
+                    res.append(('jump', (x+1, i-1)))
+                if x-1 >= 0 and m[i][x-1].is_block and not m[i-1][x-1].is_block:
+                    res.append(('jump', (x-1, i-1)))
+            # Case 3: fall
+            for i in range(y, size[1]-1):
+                if x+1 < size[0] and not m[i][x+1].is_block and \
+                        not m[i+1][x+1].is_block and m[i+2][x+1].is_block:
+                    res.append(('fall', (x+1, i+1)))
+                if x-1 >= 0 and not m[i][x-1].is_block and \
+                        not m[i+1][x-1].is_block and m[i+2][x-1].is_block:
+                    res.append(('fall', (x+1, i+1)))
+
+            res = [(f, pos) for f, pos in res if pos not in visited]
+            return res
+
+        while not que.empty():
+            front = que.get()
+            if front[1] == end:
+                res = front
+                break
+            tra = trans(front[1])
+            for f, pos in tra:
+                que.put((f, pos, front))
+                visited.add(pos)
+        def print_res(res):
+            f, p, pre = res
+            if pre:
+                print_res(pre)
+            print((f, p))
+        print_res(res)
 
 
 class Toolbox(Surface):
