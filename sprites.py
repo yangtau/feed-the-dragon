@@ -9,12 +9,10 @@ class Sprite(pygame.sprite.Sprite):
     default_pos = 'idle'
     frame_num_cnt_increment = 0.2
 
-    # TODO: normalize the size of sprites, and remove the size argu
-    def __init__(self, size: (int, int), position: (int, int), config: str):
+    def __init__(self, position: (int, int), config: str):
         # super.__init__(self)
         pygame.sprite.Sprite.__init__(self)
         self.__frames = defaultdict(list)
-        self.__size = size
         self.__load_config_file(config)
         self.__current_frame_num = 0
         self.__pose = self.default_pos
@@ -55,18 +53,9 @@ class Sprite(pygame.sprite.Sprite):
         for frame_desc in self.__frames_desc[name]:
             frame_size = (int(frame_desc['width']), int(frame_desc['height']))
             frame_pos = (int(frame_desc['x']), int(frame_desc['y']))
-            # only support interger factor scale
-            resize_factor = max(frame_size[0] // self.__size[0],
-                                frame_size[1] // self.__size[1])
-            new_size = (frame_size[0] // resize_factor,
-                        frame_size[1] // resize_factor)
-
             frame_surface = pygame.Surface(frame_size, pygame.SRCALPHA, 32)
             frame_surface.blit(self.__sprite_img, (0, 0),
                                (frame_pos, frame_size))
-            if resize_factor != 1:
-                frame_surface = pygame.transform.smoothscale(
-                    frame_surface, new_size)
             self.__frames[name].append(frame_surface)
 
     def get_frame(self, name: str, num: int):
@@ -108,10 +97,10 @@ class Sprite(pygame.sprite.Sprite):
 
 
 class Hero(Sprite):
-    def __init__(self, size: (int, int), position: (int, int), config: str):
-        super().__init__(size, position, config)
+    def __init__(self, position: (int, int), config: str):
+        super().__init__(position, config)
 
 
 class Dragon(Sprite):
-    def __init__(self, size: (int, int), position: (int, int), config: str):
-        super().__init__(size, position, config)
+    def __init__(self, position: (int, int), config: str):
+        super().__init__(position, config)

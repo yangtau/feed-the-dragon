@@ -145,20 +145,18 @@ class Map(Surface):
         # hero
         self.__hero_idx_pos = tuple(roles['hero']['position'])
         self.__hero_position = pair_mul(self.__hero_idx_pos, self.__tile_size)
-        self.__hero = sprites.Hero(
-            self.__tile_size, self.__hero_position, roles['hero']['json'])
+        self.__hero = sprites.Hero(self.__hero_position, roles['hero']['json'])
         # dragon
         self.__dragon_idx_pos = tuple(roles['dragon']['position'])
         self.__dragon_position = pair_mul(
             self.__dragon_idx_pos, self.__tile_size)
         self.__dragon = sprites.Dragon(
-            self.__tile_size, self.__dragon_position, roles['dragon']['json'])
+            self.__dragon_position, roles['dragon']['json'])
         # princess
         self.__princess_idx_pos = tuple(roles['princess']['position'])
         self.__princess_position = pair_mul(
             self.__princess_idx_pos, self.__tile_size)
-        self.__princess = sprites.Sprite(
-            self.__tile_size, self.__princess_position, roles['princess']['json']
+        self.__princess = sprites.Sprite(self.__princess_position, roles['princess']['json']
         )
         self.__group.add(self.__hero)
         self.__group.add(self.__princess)
