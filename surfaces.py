@@ -271,8 +271,10 @@ class Map(Surface):
             if pre:
                 print_res(pre)
             # print((f, p))
-            self.__hero.add_action(sprites.Action(
-                'run', pair_mul(p, self.__tile_size)))
+            if f == 'walk':
+                self.__hero.add_action(sprites.Walk(pair_mul(p, self.__tile_size)))
+            elif f == 'jump':
+                self.__hero.add_action(sprites.Jump(pair_mul(p, self.__tile_size)))
         print_res(res)
 
 

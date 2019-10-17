@@ -99,7 +99,7 @@ class Game(object):
 if __name__ == '__main__':
     size = (808, 700)
     game = Game('Feed the Dragon', size, 30)
-    m = surfaces.Map('config/map-1.json', (20, 20))
+    m = surfaces.Map('config/map-2.json', (20, 20))
     game.set_map(m)
     toolbox = surfaces.Toolbox('config/toolbox-1.json', (20, 616))
     game.set_toolbox(toolbox)
