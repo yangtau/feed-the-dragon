@@ -5,44 +5,90 @@ from resources.resource import load_image
 from resources.resource import load_json
 
 
-class Sprite(pygame.sprite.Sprite):
-    default_pos = 'idle'
-    frame_num_cnt_increment = 0.2
+class Action(object):
+    # poses
+    walk = 'walk'
+    run = 'run'
+    idle = 'idle'
 
-    def __init__(self, position: (int, int), config: str):
-        # super.__init__(self)
-        pygame.sprite.Sprite.__init__(self)
-        self.__frames = defaultdict(list)
-        self.__load_config_file(config)
-        self.__current_frame_num = 0
-        self.__pose = self.default_pos
-        self.__current_frame = self.get_frame(self.__pose, 0)
-        self.__rect = self.__current_frame.get_rect()
-        self.__to_x, self.__to_y = position
-        self.__rect.move_ip(position)
-        self.__frame_num_cnt = 0.1
-        self.__actions_que = Queue()
-
-    def add_action(self, action):
-        self.__actions_que.put(action)
+    def __init__(self, pose: str,  to_pos: (int, int)):
+        self.__pose = pose
+        self.__to_pos = to_pos
+        self.__position = None
 
     @property
     def pose(self):
         return self.__pose
 
-    @pose.setter
-    def pose(self, pose: str):
-        if pose not in self.__frames_desc:
-            raise Exception('No such pose: %s' % pose)
-        self.__pose = pose
+    @property
+    def to_pos(self):
+        return self.__to_pos
+
+    @property
+    def position(self):
+        return self.__position
+
+    @position.setter
+    def position(self, pos: (int, int)):
+        self.__position = pos
+
+    def arrived(self):
+        return self.position == self.to_pos
+
+    def update(self, speed: int):
+        '''update the position'''
+        def fn(_from: int, _to: int):
+            if _to < _from:
+                return _from - min(speed, _from - _to)
+            else:
+                return _from + min(speed, _to - _from)
+        self.position = (fn(self.position[0], self.to_pos[0]),
+                         fn(self.position[1], self.to_pos[1]))
+    def __str__(self):
+        return '"%s" %s' % (self.pose, self.to_pos)
+
+
+class Sprite(pygame.sprite.Sprite):
+    default_pose = Action.idle
+    frame_num_increment = 0.25
+    speed = 3
+
+    def __init__(self, position: (int, int), config: str):
+        pygame.sprite.Sprite.__init__(self)
+        # action
+        self.__action = Action(self.default_pose, position)
+        self.__action.position = position
+        self.__actions_que = Queue()
+        # frame
+        self.__frame_num = 0.0
+        self.__frames = defaultdict(list)
+        self.__load_config_file(config)
+        self.__rect = self.image.get_rect()
+        self.__rect.move_ip(position)
+
+    def add_action(self, action: Action):
+        self.__actions_que.put(action)
+        print(action)
+
+    @property
+    def image(self):
+        if len(self.__frames[self.__action.pose]) == 0:
+            self.__load_frame(self.__action.pose)
+        if int(self.__frame_num) >= len(self.__frames):
+            self.__frame_num = 0.0
+        return self.__frames[self.__action.pose][int(self.__frame_num)]
 
     @property
     def rect(self):
         return self.__rect
 
     @property
-    def image(self):
-        return self.__current_frame
+    def position(self):
+        return (self.__rect.left, self.__rect.top)
+
+    @position.setter
+    def position(self, pos: (int, int)):
+        self.__rect.left, self.__rect.top = pos
 
     def __load_config_file(self, config: str):
         data = load_json(config)
@@ -58,42 +104,17 @@ class Sprite(pygame.sprite.Sprite):
                                (frame_pos, frame_size))
             self.__frames[name].append(frame_surface)
 
-    def get_frame(self, name: str, num: int):
-        if len(self.__frames[name]) == 0:
-            self.__load_frame(name)
-        if len(self.__frames[name]) == 0:
-            # fail to load frame
-            raise Exception('No such frame: %s' % name)
-        mod = num % len(self.__frames[name])
-        return self.__frames[name][mod]
-
-    def move(self, speed: int, x=None, y=None):
-        if x:
-            self.__to_x = x
-        else:
-            self.__to_x = self.__rect.left
-        if y:
-            self.__to_y = y
-        else:
-            self.__to_y = self.__rect.top
-        self.__speed = speed
-
     def update(self):
-        if self.__to_x != self.__rect.left:
-            self.__rect.left += self.__get_speed(self.__rect.left, self.__to_x)
-        if self.__to_y != self.__rect.top:
-            self.__rect.top += self.__get_speed(self.__rect.top, self.__to_y)
-
-        self.__frame_num_cnt += self.frame_num_cnt_increment
-        self.__current_frame_num = int(self.__frame_num_cnt)
-        self.__current_frame = self.get_frame(
-            self.pose, self.__current_frame_num)
-
-    def __get_speed(self, from_p, to_p):
-        speed = self.__speed
-        if from_p > to_p:
-            speed = -speed
-        return min(speed, to_p - from_p)
+        if self.__action.arrived() and not self.__actions_que.empty():
+            # take a action from the queue
+            self.__action = self.__actions_que.get()
+            self.__action.position = self.position
+            self.__frame_num = 0.0
+        else:
+            # update position of the action
+            self.__frame_num += self.frame_num_increment
+            self.__action.update(self.speed)
+        self.position = self.__action.position
 
 
 class Hero(Sprite):
@@ -102,5 +123,10 @@ class Hero(Sprite):
 
 
 class Dragon(Sprite):
+    def __init__(self, position: (int, int), config: str):
+        super().__init__(position, config)
+
+
+class Princess(Sprite):
     def __init__(self, position: (int, int), config: str):
         super().__init__(position, config)

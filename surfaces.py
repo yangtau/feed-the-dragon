@@ -156,8 +156,8 @@ class Map(Surface):
         self.__princess_idx_pos = tuple(roles['princess']['position'])
         self.__princess_position = pair_mul(
             self.__princess_idx_pos, self.__tile_size)
-        self.__princess = sprites.Sprite(self.__princess_position, roles['princess']['json']
-        )
+        self.__princess = sprites.Princess(self.__princess_position, roles['princess']['json']
+                                           )
         self.__group.add(self.__hero)
         self.__group.add(self.__princess)
         self.__group.add(self.__dragon)
@@ -270,8 +270,9 @@ class Map(Surface):
             f, p, pre = res
             if pre:
                 print_res(pre)
-            print((f, p))
-            self.__hero.move(2, *pair_mul(p, self.__tile_size))
+            # print((f, p))
+            self.__hero.add_action(sprites.Action(
+                'run', pair_mul(p, self.__tile_size)))
         print_res(res)
 
 
