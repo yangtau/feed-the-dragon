@@ -1,6 +1,6 @@
 # Feed the Dragon
 
-![](https://raw.githubusercontent.com/yangtau/feed-the-dragon/master/docs/ulm.jpg)
+![](docs/UML.jpg)
 
 ## TODO
 
