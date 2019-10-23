@@ -1,0 +1,62 @@
+{
+  "size": [
+    12,
+    9
+  ],
+  "tile_size": [
+    64,
+    64
+  ],
+  "background": "background/colored_forest_croped.png",
+  "map": [
+    "............",
+    "............",
+    "............",
+    "............",
+    "wwwww.......",
+    "............",
+    "............",
+    "^^.^^^^^^^^^",
+    "$$$$$$$$$$$$"
+  ],
+  "tiles": {
+    "^": {
+      "name": "grass",
+      "texture": "tiles/grassMid.png"
+    },
+    ".": {
+      "name": "blank"
+    },
+    "$": {
+      "name": "rock",
+      "texture": "tiles/grassCenter.png"
+    },
+    "w": {
+      "name": "wall",
+      "texture": "tiles/castleCenter.png"
+    }
+  },
+  "sprites": {
+    "hero": {
+      "position": [
+        0,
+        6
+      ],
+      "json": "hero/character.json"
+    },
+    "dragon": {
+      "position": [
+        5,
+        1
+      ],
+      "json": "zombie/character.json"
+    },
+    "princess": {
+      "position": [
+        0,
+        3
+      ],
+      "json": "princess/character.json"
+    }
+  }
+}

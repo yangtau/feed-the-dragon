@@ -275,6 +275,8 @@ class Map(Surface):
                 self.__hero.add_action(sprites.Walk(pair_mul(p, self.__tile_size)))
             elif f == 'jump':
                 self.__hero.add_action(sprites.Jump(pair_mul(p, self.__tile_size)))
+            elif f == 'fall':
+                self.__hero.add_action(sprites.Fall(pair_mul(p, self.__tile_size)))
         print_res(res)
 
 
