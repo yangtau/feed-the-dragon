@@ -1,3 +1,9 @@
+'''
+@author: yangtau
+@email: yanggtau+fd@gmail.com
+@breif:
+
+'''
 import pygame
 from queue import Queue
 import sprites
@@ -115,9 +121,6 @@ class Map(Surface):
         self.__static_surf = self.__render_static()
         self.__rect = self.__static_surf.get_rect()
         self.__rect.move_ip(position)
-        # TODO: delete me
-        self.__hero.pose = 'walk'
-        self.find_the_way()
 
     @property
     def rect(self) -> pygame.Rect:

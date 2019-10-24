@@ -1,6 +1,28 @@
 import pygame
 from collections import defaultdict
 import surfaces
+from resources.resource import load_json
+from resources.resource import load_image
+
+
+class Button(object):
+    def __init__(self, onclick: callable):
+        self.__state1 = load_image('button/pause.png')
+        self.__state0 = load_image('button/start.png')
+        self.rect = self.__state1.get_rect()
+        self.__onclick = onclick
+        self.__state = 0
+
+    @property
+    def image(self):
+        if self.__state == 0:
+            return self.__state0
+        else:
+            return self.__state1
+
+    def click(self):
+        self.__state = 1-self.__state
+        self.__onclick()
 
 
 class Game(object):
@@ -27,6 +49,9 @@ class Game(object):
     def set_toolbox(self, toolbox: surfaces.Toolbox):
         self.__toolbox = toolbox
 
+    def set_button(self, btn):
+        self.__btn = btn
+
     def enroll_event_handler(self,
                              event: int,
                              handler: callable):
@@ -38,7 +63,6 @@ class Game(object):
         self.__event_handlers[event].append(handler)
 
     def drag_handler(self, event):
-        assert event.type == pygame.MOUSEBUTTONDOWN
         # click left
         if event.button == 1:
             mouse_pos = pygame.mouse.get_pos()
@@ -69,11 +93,13 @@ class Game(object):
         while True:
             self.clock.tick(self.fps)
             self.__event_handle()
-            if self.tool_in_mouse or self.force_refresh:
-                self.surface.fill((255, 255, 255))
-            # TODO: position
+            # TODO: remove the next line
+            self.surface.fill((255, 255, 255))
+            # if self.tool_in_mouse or self.force_refresh:
+            #     self.surface.fill((255, 255, 255))
             self.__map.draw(self.surface)
             self.__toolbox.draw(self.surface)
+            self.surface.blit(self.__btn.image, self.__btn.rect)
             # draw mouse
             if self.tool_in_mouse:
                 self.tool_in_mouse.rect.center = pygame.mouse.get_pos()
@@ -103,4 +129,12 @@ if __name__ == '__main__':
     game.set_map(m)
     toolbox = surfaces.Toolbox('config/toolbox-1.json', (20, 616))
     game.set_toolbox(toolbox)
+    btn = Button(m.find_the_way)
+    btn.rect.center = (756, 648)
+    game.set_button(btn)
+
+    def btn_click(event):
+        if event.button == 1 and btn.rect.collidepoint(pygame.mouse.get_pos()):
+            btn.click()
+    game.enroll_event_handler(pygame.MOUSEBUTTONDOWN, btn_click)
     game.run()
