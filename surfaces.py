@@ -148,7 +148,8 @@ class Map(Surface):
         # hero
         self.__hero_idx_pos = tuple(roles['hero']['position'])
         self.__hero_position = pair_mul(self.__hero_idx_pos, self.__tile_size)
-        self.__hero = sprites.Hero(self.__hero_position, roles['hero']['json'])
+        self.__hero = sprites.Hero(
+            self.__hero_position, roles['hero']['json'], m=self)
         # dragon
         self.__dragon_idx_pos = tuple(roles['dragon']['position'])
         self.__dragon_position = pair_mul(
@@ -159,23 +160,76 @@ class Map(Surface):
         self.__princess_idx_pos = tuple(roles['princess']['position'])
         self.__princess_position = pair_mul(
             self.__princess_idx_pos, self.__tile_size)
-        self.__princess = sprites.Princess(self.__princess_position, roles['princess']['json']
-                                           )
+        self.__princess = sprites.Princess(
+            self.__princess_position, roles['princess']['json'])
         self.__group.add(self.__hero)
         self.__group.add(self.__princess)
         self.__group.add(self.__dragon)
 
+    def __position_to_idx(self, pos: (int, int)):
+        idx_x = (pos[0])//self.__tile_size[0]
+        idx_y = (pos[1])//self.__tile_size[1]
+        return idx_x, idx_y
+
+    def is_block(self, pos: (int, int)) -> bool:
+        '''Return if there is a block in the given position.
+           Note: if there is a tool, then the function will also return true.
+        '''
+        idx_x, idx_y = self.__position_to_idx(pos)
+        return self.__map[idx_y][idx_x].is_block or \
+            self.__tools_on_map[idx_y][idx_x] != None
+
+    def __is_block(self, idx_pos: (int, int)):
+        idx_x, idx_y = idx_pos
+        return self.__map[idx_y][idx_x].is_block \
+            or self.__tools_on_map[idx_y][idx_x] != None
+
+    def get_a(self, position: (int, int)):
+        '''Return the acceleration in the given position'''
+        # Note: the effection of the tool can be blocked by block
+        idx_x, idx_y = self.__position_to_idx(position)
+        tools = self.__tools_on_map
+        tile_size = self.__tile_size
+        # m = self.__map
+        # a = 128/d
+        def fn(d):
+            return 128 / d 
+        ax, ay = 0.0, 0.0
+        for i in range(idx_x-1, -1, -1):
+            if tools[idx_y][i] and tools[idx_y][i].name == 'right':
+                ax += fn(position[0] - i*tile_size[0])
+                break
+            if self.__is_block((i, idx_y)):
+                break
+        for i in range(idx_x+1, self.__size[0]):
+            if tools[idx_y][i] and tools[idx_y][i].name == 'left':
+                ax += fn(position[0] - i*tile_size[0])
+                break
+            if self.__is_block((i, idx_y)):
+                break
+        for i in range(idx_y-1, -1, -1):
+            if tools[i][idx_x] and tools[i][idx_x].name == 'down':
+                ay += fn(position[1] - i*tile_size[1])
+                break
+            if self.__is_block((idx_x, i)):
+                break
+        for i in range(idx_y+1, self.__size[1]):
+            if tools[i][idx_x] and tools[i][idx_x].name == 'up':
+                ay += fn(position[1] - i*tile_size[1])
+                break
+            if self.__is_block((idx_x, i)):
+                break
+        return ax, ay
+
     def put_tool(self, position: (int, int), tool: Tool):
-        '''Put the tool in the position'''
+        '''Put the tool in the given position'''
         relative_pos = self.get_relative_position(position)
-        idx_x = (relative_pos[0])//self.__tile_size[0]
-        idx_y = (relative_pos[1])//self.__tile_size[1]
+        idx_x, idx_y = self.__position_to_idx(relative_pos)
         self.__tools_on_map[idx_y][idx_x] = tool
 
     def remove_tool(self, position: (int, int)):
         relative_pos = self.get_relative_position(position)
-        idx_x = (relative_pos[0])//self.__tile_size[0]
-        idx_y = (relative_pos[1])//self.__tile_size[1]
+        idx_x, idx_y = self.__position_to_idx(relative_pos)
         self.__tools_on_map[idx_y][idx_x] = None
 
     def __render_static(self):
@@ -200,11 +254,6 @@ class Map(Surface):
                 if tool:
                     position = (j*self.__tile_size[0], i*self.__tile_size[1])
                     map_surf.blit(tool.texture, position)
-        '''
-        self.__hero.draw(map_surf)
-        self.__dragon.draw(map_surf)
-        self.__princess.draw(map_surf)
-        '''
         self.__group.draw(map_surf)
         self.__group.update()
         surface.blit(map_surf, self.__rect)
@@ -213,7 +262,7 @@ class Map(Surface):
         '''find the way that the hero should go'''
         start = self.__hero_idx_pos
         end = self.__princess_idx_pos
-        m = self.__map
+        # m = self.__map
         que = Queue()
         visited = set()
         que.put((None, start, None))
@@ -232,29 +281,29 @@ class Map(Surface):
             x, y = state
             # Case 1: walk
             # right
-            if x+1 < size[0] and not m[y][x+1].is_block and m[y+1][x+1].is_block:
+            if x+1 < size[0] and not self.__is_block((x+1, y)) and self.__is_block((x+1, y+1)):
                 res.append(('walk', (x+1, y)))
             # left
-            if x-1 >= 0 and not m[y][x-1].is_block and m[y+1][x-1].is_block:
+            if x-1 >= 0 and not self.__is_block((x-1, y)) and self.__is_block((x-1, y+1)):
                 res.append(('walk', (x-1, y)))
             # Case 2: jump
             for i in range(y, 0, -1):
                 # top of current cell should be empty
-                if m[i-1][x].is_block:
+                if self.__is_block((x, i-1)):
                     break
                 # top of the block that hero jump to, should be empty
-                if x+1 < size[0] and m[i][x+1].is_block and not m[i-1][x+1].is_block:
+                if x+1 < size[0] and self.__is_block((x+1, i)) and not self.__is_block((x+1, i-1)):
                     res.append(('jump', (x+1, i-1)))
-                if x-1 >= 0 and m[i][x-1].is_block and not m[i-1][x-1].is_block:
+                if x-1 >= 0 and self.__is_block((x-1, i)) and not self.__is_block((x-1, i-1)):
                     res.append(('jump', (x-1, i-1)))
             # Case 3: fall
             for i in range(y, size[1]-1):
-                if x+1 < size[0] and not m[i][x+1].is_block and \
-                        not m[i+1][x+1].is_block and m[i+2][x+1].is_block:
+                if x+1 < size[0] and not self.__is_block((x+1, i)) and \
+                        not self.__is_block((x+1, i+1)) and self.__is_block((x+1, i+2)):
                     res.append(('fall', (x+1, i+1)))
-                if x-1 >= 0 and not m[i][x-1].is_block and \
-                        not m[i+1][x-1].is_block and m[i+2][x-1].is_block:
-                    res.append(('fall', (x+1, i+1)))
+                if x-1 >= 0 and not self.__is_block((x-1, i)) and \
+                        not self.__is_block((x-1, i+1)) and self.__is_block((x-1, i+2)):
+                    res.append(('fall', (x-1, i+1)))
 
             res = [(f, pos) for f, pos in res if pos not in visited]
             return res
@@ -265,9 +314,13 @@ class Map(Surface):
                 res = front
                 break
             tra = trans(front[1])
+            print(front[1], tra)
             for f, pos in tra:
                 que.put((f, pos, front))
                 visited.add(pos)
+        else:
+            # TODO
+            print("No solution found")
 
         def print_res(res):
             f, p, pre = res
@@ -275,11 +328,14 @@ class Map(Surface):
                 print_res(pre)
             # print((f, p))
             if f == 'walk':
-                self.__hero.add_action(sprites.Walk(pair_mul(p, self.__tile_size)))
+                self.__hero.add_action(sprites.Walk(
+                    pair_mul(p, self.__tile_size)))
             elif f == 'jump':
-                self.__hero.add_action(sprites.Jump(pair_mul(p, self.__tile_size)))
+                self.__hero.add_action(sprites.Jump(
+                    pair_mul(p, self.__tile_size)))
             elif f == 'fall':
-                self.__hero.add_action(sprites.Fall(pair_mul(p, self.__tile_size)))
+                self.__hero.add_action(sprites.Fall(
+                    pair_mul(p, self.__tile_size)))
         print_res(res)
 
 
