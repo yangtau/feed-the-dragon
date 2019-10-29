@@ -6,11 +6,11 @@ from resources.resource import load_image
 
 
 class Button(object):
-    def __init__(self, onclick: callable):
+    def __init__(self, m: surfaces.Map):
         self.__state1 = load_image('button/pause.png')
         self.__state0 = load_image('button/start.png')
         self.rect = self.__state1.get_rect()
-        self.__onclick = onclick
+        self.__m = m
         self.__state = 0
 
     @property
@@ -21,8 +21,11 @@ class Button(object):
             return self.__state1
 
     def click(self):
+        if self.__state == 0:
+            self.__m.start()
+        else:
+            self.__m.reset()
         self.__state = 1-self.__state
-        self.__onclick()
 
 
 class Game(object):
@@ -125,11 +128,11 @@ class Game(object):
 if __name__ == '__main__':
     size = (808, 700)
     game = Game('Feed the Dragon', size, 30)
-    m = surfaces.Map('config/map-3.json', (20, 20))
+    m = surfaces.Map('config/map-2.json', (20, 20))
     game.set_map(m)
     toolbox = surfaces.Toolbox('config/toolbox-1.json', (20, 616))
     game.set_toolbox(toolbox)
-    btn = Button(m.find_the_way)
+    btn = Button(m)
     btn.rect.center = (756, 648)
     game.set_button(btn)
 
