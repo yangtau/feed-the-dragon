@@ -225,6 +225,7 @@ class Map(Surface):
         surface.blit(map_surf, self.__rect)
 
     def reset(self):
+        self.__state = 0
         self.__hero.clear_actions()
         self.__hero.position = self.__hero_position
 
