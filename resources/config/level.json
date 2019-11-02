@@ -1,10 +1,12 @@
 [
-  [
-    "level 1",
-    "map-2.json"
-  ],
-  [
-    "level 2",
-    "map-3.json"
-  ]
+  {
+    "name": "教学关",
+    "map": "map-2.json",
+    "toolbox": "toolbox.json"
+  },
+  {
+    "name": "第二关",
+    "map": "map-3.json",
+    "toolbox": "toolbox.json"
+  }
 ]
