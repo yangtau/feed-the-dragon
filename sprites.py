@@ -2,6 +2,7 @@
 @author: yangtau
 @email: yanggtau+fd@gmail.com
 @brief: 
+    the sprite of roles in game
 '''
 import pygame
 import math
