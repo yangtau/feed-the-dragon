@@ -80,6 +80,10 @@ class PageManager(object):
            and it will be displayed in the next loop
         '''
         self.__page_stack.append(page)
+    
+    def replace(self, page: PageBase):
+        '''Replace the current top page with `page`'''
+        self.__page_stack[-1] = page
 
     def pop(self):
         '''Exit the top page'''
