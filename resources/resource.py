@@ -39,10 +39,10 @@ def load_image(filename: str):
 def load_json(filename: str):
     filepath = os.path.join(__res_dir, filename)
     with open(filepath) as f:
-        data = json.load(f)
+        data = json.load(f, encoding='utf-8')
     return data
 
 def save_json(filename: str, json_obj):
     filepath = os.path.join(__res_dir, filename)
     with open(filepath, 'w') as f:
-        json.dump(json_obj, f)
+        json.dump(json_obj, f, encoding='utf-8')
