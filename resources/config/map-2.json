@@ -46,15 +46,15 @@
     },
     "dragon": {
       "position": [
-        5,
-        1
+        0,
+        3
       ],
       "json": "zombie/character.json"
     },
     "princess": {
       "position": [
-        0,
-        3
+        11,
+        6
       ],
       "json": "princess/character.json"
     }

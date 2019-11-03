@@ -37,6 +37,8 @@ class GamePage(page_manager.PageBase):
         self.__map = surfaces.Map(map_config_file, (20, 20))
         self.__toolbox = surfaces.Toolbox(toolbox_config_file, (20, 616))
         self.__surface = pygame.Surface((808, 700), pygame.SRCALPHA, 32)
+        # background
+        self.__background = load_image('background/colored_forest_croped.png')
         # button
         self.__start = False
         self.__btn = Button()
@@ -83,9 +85,7 @@ class GamePage(page_manager.PageBase):
                 self.force_refresh = True
 
     def draw(self, window_surface):
-        window_surface.fill((255, 255, 255))
-        # if self.tool_in_mouse or self.force_refresh:
-        #     self.surface.fill((255, 255, 255))
+        window_surface.blit(self.__background, (0, 0))
         self.__map.draw(window_surface)
         self.__toolbox.draw(window_surface)
         window_surface.blit(self.__btn.image, self.__btn.rect)
@@ -95,3 +95,9 @@ class GamePage(page_manager.PageBase):
             window_surface.blit(self.tool_in_mouse.texture,
                                 self.tool_in_mouse.rect)
         self.force_refresh = False
+
+if __name__ == '__main__':
+    pm = page_manager.PageManager((808, 700), 'hello')
+    pm.push(GamePage(pm, 'config/map-1.json', 'config/toolbox-1.json'))
+    pm.run()
+    

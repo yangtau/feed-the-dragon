@@ -70,16 +70,19 @@ class PageManager(object):
         self.__fps = fps
         self.__size = size
         self.__page_stack = []
-        # init gui
 
     @property
     def size(self):
         return self.__size
 
     def push(self, page: PageBase):
+        '''Push a new page into the stack, 
+           and it will be displayed in the next loop
+        '''
         self.__page_stack.append(page)
 
     def pop(self):
+        '''Exit the top page'''
         self.__page_stack.pop()
         if len(self.__page_stack) == 0:
             # Exit when there is no page in the stack
