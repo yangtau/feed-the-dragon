@@ -35,8 +35,14 @@ def load_image(filename: str):
     return pygame.image.load(filepath).convert_alpha()
 
 
+@lru_cache(maxsize=64)
 def load_json(filename: str):
     filepath = os.path.join(__res_dir, filename)
     with open(filepath) as f:
         data = json.load(f)
     return data
+
+def save_json(filename: str, json_obj):
+    filepath = os.path.join(__res_dir, filename)
+    with open(filepath, 'w') as f:
+        json.dump(json_obj, f)
