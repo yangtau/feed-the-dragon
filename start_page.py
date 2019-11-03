@@ -45,7 +45,7 @@ class StartPage(pm.PageBase):
     def __init_btn(self):
         btn_rect = [pygame.Rect((self.btn_x_off, self.btn_y_off +
                                  (self.btn_margin+self.btn_size[1])*i),
-                                self.btn_size) for i in range(3)]
+                                self.btn_size) for i in range(4)]
         # start button
         self.__start_btn = pygame_gui.elements.UIButton(
             btn_rect[0], "开始!", self.gui_manager)
@@ -60,9 +60,15 @@ class StartPage(pm.PageBase):
         self.register_gui_event_handler('ui_button_pressed',
                                         self.__setting_btn,
                                         lambda e: print('setting'))
+        # map editor button
+        self.__map_editor_btn = pygame_gui.elements.UIButton(
+            btn_rect[2], "地图编辑", self.gui_manager)
+        self.register_gui_event_handler('ui_button_pressed',
+                                        self.__map_editor_btn,
+                                        lambda e: print('map editor'))
         # quit button
         self.__quit_btn = pygame_gui.elements.UIButton(
-            btn_rect[2], "退出", self.gui_manager)
+            btn_rect[3], "退出", self.gui_manager)
         self.register_gui_event_handler('ui_button_pressed',
                                         self.__quit_btn,
                                         lambda e: self.page_manager.pop())
