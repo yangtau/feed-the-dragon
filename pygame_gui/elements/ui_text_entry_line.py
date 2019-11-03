@@ -22,7 +22,7 @@ class UITextEntryLine(UIElement):
     :param relative_rect: A rectangle describing the position and width of the text entry element.
     :param manager: The UIManager that manages this element.
     :param container: The container that this element is within. If set to None will be the root window's container.
-    :param element_ids: A list of ids that describe the 'journey' of UIElements that this UIElement is part of.
+    :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
     """
 
@@ -35,37 +35,43 @@ class UITextEntryLine(UIElement):
     def __init__(self, relative_rect: pygame.Rect,
                  manager: ui_manager.UIManager,
                  container: ui_container.UIContainer = None,
-                 element_ids: Union[List[str], None] = None, object_id: Union[str, None] = None):
-        if element_ids is None:
-            new_element_ids = ['text_entry_line']
-        else:
-            new_element_ids = element_ids.copy()
-            new_element_ids.append('text_entry_line')
+                 parent_element: UIElement = None,
+                 object_id: Union[str, None] = None):
+
+        new_element_ids, new_object_ids = self.create_valid_ids(parent_element=parent_element,
+                                                                object_id=object_id,
+                                                                element_id='text_entry_line')
         super().__init__(relative_rect, manager, container,
                          starting_height=1, layer_thickness=1,
                          element_ids=new_element_ids,
-                         object_id=object_id)
+                         object_ids=new_object_ids)
         self.selected = False
 
         # theme font
-        self.font = self.ui_theme.get_font(self.object_id, self.element_ids)
+        self.font = self.ui_theme.get_font(self.object_ids, self.element_ids)
 
         # colours from theme
-        self.bg_colour = self.ui_theme.get_colour(self.object_id, self.element_ids, 'normal_bg')
-        self.text_colour = self.ui_theme.get_colour(self.object_id, self.element_ids, 'normal_text')
-        self.selected_text_colour = self.ui_theme.get_colour(self.object_id, self.element_ids, 'selected_text')
-        self.selected_bg_colour = self.ui_theme.get_colour(self.object_id, self.element_ids, 'selected_bg')
-        self.border_colour = self.ui_theme.get_colour(self.object_id, self.element_ids, 'border')
+        self.bg_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'dark_bg')
+        self.text_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'normal_text')
+        self.selected_text_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'selected_text')
+        self.selected_bg_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'selected_bg')
+        self.border_colour = self.ui_theme.get_colour(self.object_ids, self.element_ids, 'normal_border')
 
         # misc data from the theme
-        border_width_str = self.ui_theme.get_misc_data(self.object_id, self.element_ids, 'border_width')
+        border_width_str = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'border_width')
         if border_width_str is None:
             self.border_width = 1
         else:
             self.border_width = int(border_width_str)
+
+        self.shadow_width = 1
+        shadow_width_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'shadow_width')
+        if shadow_width_string is not None:
+            self.shadow_width = int(shadow_width_string)
+
         self.text = ""
 
-        padding_str = self.ui_theme.get_misc_data(self.object_id, self.element_ids, 'padding')
+        padding_str = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'padding')
         if padding_str is None:
             self.horiz_line_padding = 4
             self.vert_line_padding = 2
@@ -100,22 +106,33 @@ class UITextEntryLine(UIElement):
         self.text_surface = self.font.render(self.text, True, self.text_colour)
         line_height = self.text_surface.get_rect().height
 
-        self.relative_rect.height = line_height + (2 * self.vert_line_padding) + (2 * self.border_width)
+        self.relative_rect.height = (line_height + (2 * self.vert_line_padding) +
+                                     (2 * self.border_width) + (2 * self.shadow_width))
         self.rect.height = self.relative_rect.height
 
         self.cursor = pygame.Rect((self.text_surface.get_rect().right + 2,
-                                   self.vert_line_padding + self.border_width), (1, line_height))
+                                   self.vert_line_padding + self.border_width + self.shadow_width),
+                                  (1, line_height))
 
-        self.background_and_border = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA)
-        self.background_and_border.fill(self.border_colour)
-        self.background_and_border.fill(self.bg_colour,
-                                        pygame.Rect((self.border_width,
-                                                     self.border_width),
-                                                    (self.rect.width - (self.border_width * 2),
-                                                     self.rect.height - (self.border_width * 2)
-                                                     )))
-        self.text_image = pygame.Surface(((self.rect.width-(self.border_width * 2),
-                                           self.rect.height-(self.border_width * 2))), flags=pygame.SRCALPHA)
+        if self.shadow_width > 0:
+            self.background_and_border = self.ui_manager.get_shadow(self.rect.size)
+        else:
+            self.background_and_border = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA)
+
+        border_rect = pygame.Rect((self.shadow_width, self.shadow_width),
+                                  (self.rect.width - (2 * self.shadow_width),
+                                   self.rect.height - (2 * self.shadow_width)))
+        self.background_and_border.fill(self.border_colour, border_rect)
+
+        background_and_border_rect = pygame.Rect((self.border_width + self.shadow_width,
+                                                  self.border_width + self.shadow_width),
+                                                 (self.rect.width - (self.border_width * 2) -
+                                                  (self.shadow_width * 2),
+                                                  self.rect.height - (self.border_width * 2) -
+                                                  (self.shadow_width * 2)))
+
+        self.background_and_border.fill(self.bg_colour, background_and_border_rect)
+        self.text_image = pygame.Surface(background_and_border_rect.size, flags=pygame.SRCALPHA)
         self.text_image.fill(self.bg_colour)
 
         self.image = self.background_and_border.copy()
@@ -199,8 +216,10 @@ class UITextEntryLine(UIElement):
         else:
             self.text_surface = self.font.render(self.text, True, self.text_colour)
 
-        text_clip_width = self.rect.width - (self.horiz_line_padding * 2) - (self.border_width * 2)
-        text_clip_height = self.rect.height - (self.vert_line_padding * 2) - (self.border_width * 2)
+        text_clip_width = (self.rect.width - (self.horiz_line_padding * 2) -
+                           (self.border_width * 2) - (self.shadow_width * 2))
+        text_clip_height = (self.rect.height - (self.vert_line_padding * 2) -
+                            (self.border_width * 2) - (self.shadow_width * 2))
         text_surface_clip = pygame.Rect((0,
                                          0),
                                         (text_clip_width,
@@ -236,11 +255,13 @@ class UITextEntryLine(UIElement):
         redrawing all the text.
         """
         self.image = self.background_and_border.copy()
-        self.image.blit(self.text_image, (self.border_width, self.border_width))
+        self.image.blit(self.text_image, (self.border_width + self.shadow_width,
+                                          self.border_width + self.shadow_width))
         if self.cursor_on:
             cursor_len_str = self.text[:self.edit_position]
             cursor_size = self.font.size(cursor_len_str)
-            self.cursor.x = cursor_size[0] + self.border_width + self.horiz_line_padding - self.start_text_offset
+            self.cursor.x = (cursor_size[0] + self.border_width + self.shadow_width +
+                             self.horiz_line_padding - self.start_text_offset)
             pygame.draw.rect(self.image, self.text_colour, self.cursor)
 
     def update(self, time_delta: float):
@@ -382,7 +403,7 @@ class UITextEntryLine(UIElement):
                                                               {'user_type': 'ui_text_entry_finished',
                                                                'text': self.text,
                                                                'ui_element': self,
-                                                               'ui_object_id': self.object_id})
+                                                               'ui_object_id': self.object_ids[-1]})
                     pygame.event.post(entry_finished_event)
                 elif event.key == pygame.K_a and event.mod & pygame.KMOD_CTRL:
                     self.select_range = [0, len(self.text)]
@@ -514,7 +535,7 @@ class UITextEntryLine(UIElement):
 
         :param pixel_pos: The x position of our click after being adjusted for text in our box scrolling offscreen.
         """
-        start_pos = self.rect.x + self.border_width + self.horiz_line_padding
+        start_pos = self.rect.x + self.border_width + self.shadow_width + self.horiz_line_padding
         acc_pos = start_pos
         index = 0
         for char in self.text:

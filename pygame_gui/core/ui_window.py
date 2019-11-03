@@ -1,41 +1,53 @@
 import pygame
 from typing import List, Union
 
+from ..core.ui_element import UIElement
 from ..core.ui_container import UIContainer
 from .. import ui_manager
 
 
-class UIWindow(pygame.sprite.Sprite):
+class UIWindow(UIElement):
     """
     A base class for window GUI elements, any windows should inherit from this class.
 
     :param rect: A rectangle that completely surrounds the window.
     :param manager: The UIManager that manages this UIElement.
-    :param element_ids: A list of ids that describe the 'journey' of UIElements that this UIElement is part of.
-    :param object_id: A custom defined ID for fine tuning of theming.
+    :param element_ids: A list of ids that describe the 'hierarchy' of UIElements that this UIElement is part of.
+    :param object_ids: A list of custom defined IDs that describe the 'hierarchy' that this UIElement is part of.
     """
-    def __init__(self, rect: pygame.Rect, manager: 'ui_manager.UIManager',
-                 element_ids: Union[List[str], None] = None, object_id: Union[str, None] = None):
-        self._layer = 0
-        if element_ids is None:
-            new_element_ids = ["window"]
+    def __init__(self, rect: pygame.Rect,
+                 manager: 'ui_manager.UIManager',
+                 element_ids: List[str],
+                 object_ids: Union[List[Union[str, None]], None] = None):
+
+        new_element_ids = element_ids.copy()
+        if object_ids is not None:
+            new_object_ids = object_ids.copy()
         else:
-            new_element_ids = element_ids.copy()
-            new_element_ids.append("window")
-        self.layer_thickness = 1
-        self.ui_manager = manager
-        super().__init__(self.ui_manager.get_sprite_group())
+            new_object_ids = [None]
 
-        self.element_ids = new_element_ids
-        self.object_id = object_id
+        self.window_container = None
+        # need to create the container that holds the elements first if this is the root window
+        # so we can bootstrap everything and effectively add the root window to it's own container.
+        # It's a little bit weird.
+        if len(element_ids) == 1 and element_ids[0] == 'root_window':
+            self._layer = 0
+            self.window_container = UIContainer(rect.copy(), manager, None, None, None)
+            self.window_stack = manager.get_window_stack()
+            self.window_stack.add_new_window(self)
 
-        self.window_container = UIContainer(rect.copy(), manager, None, self.element_ids, self.object_id)
+        super().__init__(rect, manager, container=None,
+                         starting_height=1,
+                         layer_thickness=1,
+                         object_ids=new_object_ids,
+                         element_ids=new_element_ids)
 
-        self.window_stack = self.ui_manager.get_window_stack()
-        self.window_stack.add_new_window(self)
+        if self.window_container is None:
+            self.window_container = UIContainer(self.rect.copy(), manager, None, self, None)
+            self.window_stack = self.ui_manager.get_window_stack()
+            self.window_stack.add_new_window(self)
 
         self.image = self.image = pygame.Surface((0, 0))
-        self.rect = rect
 
     def process_event(self, event: pygame.event.Event) -> bool:
         """

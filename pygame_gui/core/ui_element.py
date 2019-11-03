@@ -17,13 +17,14 @@ class UIElement(pygame.sprite.Sprite):
     :param container: A container that this element is contained in.
     :param starting_height: Used to record how many layers above it's container this element should be. Normally 1.
     :param layer_thickness: Used to record how 'thick' this element is in layers. Normally 1.
-    :param element_ids: A list of ids that describe the 'journey' of UIElements that this UIElement is part of.
-    :param object_id: A custom defined ID for fine tuning of theming.
+    :param element_ids: A list of ids that describe the 'hierarchy' of UIElements that this UIElement is part of.
+    :param object_ids: A list of custom defined IDs that describe the 'hierarchy' that this UIElement is part of.
     """
     def __init__(self, relative_rect: pygame.Rect, manager: 'ui_manager.UIManager',
                  container: Union['ui_container.UIContainer', None],
                  starting_height: int, layer_thickness: int,
-                 object_id: Union[str, None] = None, element_ids: Union[List[str], None] = None):
+                 object_ids: Union[List[Union[str, None]], None] = None,
+                 element_ids: Union[List[str], None] = None):
 
         self._layer = 0
         self.ui_manager = manager
@@ -31,7 +32,7 @@ class UIElement(pygame.sprite.Sprite):
         self.relative_rect = relative_rect
         self.ui_group = self.ui_manager.get_sprite_group()
         self.ui_theme = self.ui_manager.get_theme()
-        self.object_id = object_id
+        self.object_ids = object_ids
         self.element_ids = element_ids
 
         self.layer_thickness = layer_thickness
@@ -63,6 +64,33 @@ class UIElement(pygame.sprite.Sprite):
         self.is_enabled = True
         self.hovered = False
         self.hover_time = 0.0
+
+    @staticmethod
+    def create_valid_ids(parent_element, object_id, element_id):
+        """
+        Creates valid id lists for an element. It will assert if users supply object IDs that won't work such as those
+        containing full stops. These ID lists are used by the theming system to identify what theming parameters to
+        apply to which element.
+
+        :param parent_element: Element that this element 'belongs to' in theming. Elements inherit colours from parents.
+        :param object_id: An optional ID to help distinguish this element from other elements of the same class.
+        :param element_id: A string ID representing this element's class.
+        :return:
+        """
+        if object_id is not None and ('.' in object_id or ' ' in object_id):
+            raise ValueError('Object ID cannot contain fullstops or spaces: ' + str(object_id))
+
+        if parent_element is not None:
+            new_element_ids = parent_element.element_ids.copy()
+            new_element_ids.append(element_id)
+
+            new_object_ids = parent_element.object_ids.copy()
+            new_object_ids.append(object_id)
+        else:
+            new_element_ids = [element_id]
+            new_object_ids = [object_id]
+
+        return new_element_ids, new_object_ids
 
     def update_containing_rect_position(self):
         """
