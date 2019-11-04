@@ -382,7 +382,7 @@ class UIDropDownMenu(UIElement):
                                                                 self.element_ids,
                                                                 self.object_ids
                                                                 )}
-        if init_state != 'closed' or init_state != 'expanded':
+        if init_state != 'closed' and init_state != 'expanded':
             warnings.warn('Unsuppored state name: {}'.format(init_state))
         self.current_state = self.menu_states[init_state]
         self.current_state.start()
