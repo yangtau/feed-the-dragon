@@ -4,10 +4,10 @@ import json
 from functools import lru_cache
 
 
-__res_dir = os.path.dirname(__file__)
+RES_DIR = os.path.dirname(__file__)
 
-FONTS_DIR = os.path.join(__res_dir, 'fonts/')
-THEME_DIR = os.path.join(__res_dir, 'theme/')
+FONTS_DIR = os.path.join(RES_DIR, 'fonts/')
+THEME_DIR = os.path.join(RES_DIR, 'theme/')
 
 
 @lru_cache(maxsize=64)
@@ -31,18 +31,18 @@ def get_font(font_name: str, size: int) -> pygame.font.Font:
 
 @lru_cache(maxsize=64)
 def load_image(filename: str):
-    filepath = os.path.join(__res_dir, filename)
+    filepath = os.path.join(RES_DIR, filename)
     return pygame.image.load(filepath).convert_alpha()
 
 
 @lru_cache(maxsize=64)
 def load_json(filename: str):
-    filepath = os.path.join(__res_dir, filename)
+    filepath = os.path.join(RES_DIR, filename)
     with open(filepath, encoding='utf-8') as f:
         data = json.load(f, encoding='utf-8')
     return data
 
 def save_json(filename: str, json_obj):
-    filepath = os.path.join(__res_dir, filename)
+    filepath = os.path.join(RES_DIR, filename)
     with open(filepath, 'w', encoding='utf-8') as f:
         json.dump(json_obj, f, encoding='utf-8')
