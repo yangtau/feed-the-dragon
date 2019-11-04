@@ -6,7 +6,7 @@
 '''
 import pygame_gui
 import pygame
-from level_page import LevelPage
+from backgroud_info_page import BackgroundInfoPage
 from page_manager import PageManager, PageBase
 from resources.resource import load_json, load_image, get_font
 
@@ -15,7 +15,7 @@ class StartPage(PageBase):
     size = (808, 700)
     # button size and pos
     btn_size = (160, 60)
-    btn_margin = 40
+    btn_margin = 30
     btn_y_off = 300
     btn_x_off = (size[0] - btn_size[0]) / 2
     # title
@@ -50,7 +50,7 @@ class StartPage(PageBase):
         self.register_gui_event_handler(
             'ui_button_pressed',
             self.__start_btn,
-            lambda e: self.page_manager.push(LevelPage(self.page_manager)))
+            lambda e: self.page_manager.push(BackgroundInfoPage(self.page_manager)))
         # setting button
         self.__setting_btn = pygame_gui.elements.UIButton(
             btn_rect[1], "设置", self.gui_manager)
