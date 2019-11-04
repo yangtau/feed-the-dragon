@@ -36,7 +36,7 @@ class GamePage(page_manager.PageBase):
         super().__init__(pm)
         self.__map = surfaces.Map(map_config_file, (20, 20))
         self.__toolbox = surfaces.Toolbox(toolbox_config_file, (20, 616))
-        self.__surface = pygame.Surface((808, 700), pygame.SRCALPHA, 32)
+        #self.__surface = pygame.Surface((808, 700), pygame.SRCALPHA, 32)
         # background
         self.__background = load_image('background/colored_forest_croped.png')
         # button
