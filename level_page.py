@@ -53,7 +53,7 @@ class LevelPage(PageBase):
 
     def __list_event_handle(self, event):
         level_name = event.text
-        self.page_manager.push(GamePage(
+        self.page_manager.replace(GamePage(
             self.page_manager,
             self.__level_info[level_name]['map'],
             self.__level_info[level_name]['toolbox']
