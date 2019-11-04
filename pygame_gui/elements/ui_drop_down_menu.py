@@ -304,7 +304,7 @@ class UIDropDownMenu(UIElement):
     """
     def __init__(self, options_list: List[str],
                  starting_option: str,
-                 init_state: str
+                 init_state: str,
                  relative_rect: pygame.Rect,
                  manager: ui_manager.UIManager,
                  container: ui_container.UIContainer = None,
