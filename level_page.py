@@ -4,14 +4,14 @@
 @brief:
     a page where plays select the level.
 '''
-import page_manager
-import game_page
 import pygame_gui
 import pygame
 from resources.resource import load_image, load_json, get_font
+from game_page import GamePage
+from page_manager import PageManager, PageBase
 
 
-class LevelPage(page_manager.PageBase):
+class LevelPage(PageBase):
     size = (808, 700)
     # level list
     level_list_width = 300
@@ -25,10 +25,10 @@ class LevelPage(page_manager.PageBase):
     title_text_size = 50
     title_color = (120, 120, 255)
 
-    def __init__(self, pm, level_info_file: str):
+    def __init__(self, pm):
         super().__init__(pm)
         self.__background = load_image("background/colored_forest_croped.png")
-        self.__level_info = load_json(level_info_file)
+        self.__level_info = load_json('config/level.json')
         self.__init_level_list()
         self.__init_title()
 
@@ -53,7 +53,7 @@ class LevelPage(page_manager.PageBase):
 
     def __list_event_handle(self, event):
         level_name = event.text
-        self.page_manager.push(game_page.GamePage(
+        self.page_manager.push(GamePage(
             self.page_manager,
             self.__level_info[level_name]['map'],
             self.__level_info[level_name]['toolbox']
@@ -65,6 +65,6 @@ class LevelPage(page_manager.PageBase):
 
 
 if __name__ == '__main__':
-    pm = page_manager.PageManager((808, 700), 'level page')
-    pm.push(LevelPage(pm, 'config/level.json'))
+    pm = PageManager((808, 700), 'level page')
+    pm.push(LevelPage(pm))
     pm.run()
