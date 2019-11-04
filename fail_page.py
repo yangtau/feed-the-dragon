@@ -27,44 +27,34 @@ class FailPage(PageBase):
     def __init__(self, pm: PageManager, level_name: str):
         super().__init__(pm)
         self.__level_name = level_name
-        # next_level: (map_json, toolbox_json)
-        self.__next_level = self.__get_next_level(level_name)
         self.__background = load_image('background/colored_talltrees.png')
+        self.__level_name = level_name
         self.__init_title()
         self.__init_btn()
 
-    def __get_next_level(self, level):
-        '''Return the map json and toolbox json of the next level'''
+    def __retry_handle(self, event):
         level_info = load_json('config/level.json')
-        for i in range(len(level_info)):
-            if level_info[i]['name'] == level:
+        for level in level_info:
+            if level['name'] == self.__level_name:
+                self.page_manager.replace(
+                    GamePage(self.page_manager, level['map'], level['toolbox']))
                 break
-        i += 1
-        if i < len(level_info):
-            return level_info[i]['map'], level_info[i]['toolbox']
-        return None
 
     def __init_btn(self):
         btn_x_off = (self.size[0]-self.btn_size[0]*2-self.btn_margin)//2
-        next_level_btn = pygame_gui.elements.UIButton(
+        retry_btn = pygame_gui.elements.UIButton(
             pygame.Rect((btn_x_off, self.btn_y_off), self.btn_size),
-            '下一关',
-            self.gui_manager
+            '重试', self.gui_manager
         )
-        # disable next_btn if this is the last level
-        if not self.__next_level:
-            next_level_btn.disable()
         self.register_gui_event_handler(
-            'ui_button_pressed', next_level_btn,
-            lambda e: self.page_manager.replace(
-                GamePage(self.page_manager, *self.__next_level)
-            )
+            'ui_button_pressed', retry_btn,
+            self.__retry_handle
         )
+
         quit_btn = pygame_gui.elements.UIButton(
             pygame.Rect(
                 (btn_x_off+self.btn_size[0]+self.btn_margin, self.btn_y_off), self.btn_size),
-            '退出',
-            self.gui_manager
+            '退出', self.gui_manager
         )
         self.register_gui_event_handler(
             'ui_button_pressed', quit_btn,
