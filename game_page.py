@@ -7,7 +7,7 @@
 import pygame
 import pygame_gui
 from collections import defaultdict
-import surfaces
+import surface
 from page_manager import PageBase, PageManager
 from resources.resource import load_json
 from resources.resource import load_image
@@ -31,13 +31,101 @@ class Switch(object):
         self.__state = 1-self.__state
 
 
+class Tool(object):
+    '''Tool
+    Attr:
+        texture
+        name
+    '''
+
+    def __init__(self, tool_config: dict, btn: pygame_gui.elements.UIButton):
+        self.__texture = load_image(tool_config['texture'])
+        self.__name = tool_config['name']
+        self.__count = tool_config['number']
+        self.__btn = btn
+
+    @property
+    def button(self):
+        return self.__btn
+
+    @property
+    def texture(self):
+        return self.__texture
+
+    @property
+    def number(self):
+        return self.__count
+
+    @property
+    def name(self) -> str:
+        return self.__name
+
+    def inc_num(self):
+        self.__count += 1
+
+    def dec_num(self):
+        self.__count -= 1
+
+
 class GamePage(PageBase):
-    def __init__(self, pm, map_config_file: str, toolbox_config_file: str):
+    # map
+    map_pos = (20, 10)
+    # toolbox
+    tool_pos = (20, 596)
+    tool_margin = 10
+    tool_size = (64, 64)
+
+    def __init__(self, pm, map_config_file: str):
         super().__init__(pm)
-        self.__map = surfaces.Map(map_config_file, (20, 20))
-        self.__toolbox = surfaces.Toolbox(toolbox_config_file, (20, 616))
+        map_config = load_json(map_config_file)
+        # map
+        self.__map_surf = surface.MapSurface(map_config)
         # background
-        self.__background = load_image('background/colored_talltrees.png')
+        self.__background = load_image(map_config['background'])
+        # draw map on background, reduce one blit call
+        self.__background.blit(self.__map_surf.surface, self.map_pos)
+        # toolbox
+        self.__init_toolbox(map_config['toolbox'])
+
+    def __init_toolbox(self, toolbox_config):
+        '''
+        toolbox_config:
+        [{"name":"", "object_id":"", "numbet":1}...]
+        - object_id is used in pygame_gui.elements.UIButton, and it is defined 
+        in resources/theme/theme.json.
+        '''
+        self.__tools = dict()
+        tool_poss = [(i*(self.tool_size[0]+self.tool_margin)+self.tool_pos[0],
+                      self.tool_pos[1]) for i in range(len(toolbox_config))]
+        for pos, conf in zip(tool_poss, toolbox_config):
+            tool_btn = pygame_gui.elements.UIButton(
+                pygame.Rect(pos, self.tool_size), '', self.gui_manager,
+                object_id=conf['object_id']
+            )
+            self.__tools[conf['name']] = Tool(conf, tool_btn)
+            self.register_gui_event_handler(
+                'ui_button_pressed', tool_btn,
+                self.__get_tool_click_handler(conf['name']))
+
+    def __get_tool_click_handler(self, name) -> callable:
+        '''Return a gui event handler'''
+        def handler(event):
+            print(name)
+        return handler
+
+    def __update_tools(self):
+        for tool in self.__tools.values():
+            tool.button.set_text(str(tool.number))
+            if tool.number == 0:
+                tool.button.disable()
+            else:
+                tool.button.enable()
+
+    def draw(self, win_surf):
+        win_surf.blit(self.__background, (0, 0))
+        self.__update_tools()
+
+        '''
         # button
         self.__start = False
         self.__btn = Switch()
@@ -82,11 +170,8 @@ class GamePage(PageBase):
             if self.tool_in_mouse:
                 self.tool_in_mouse = None
                 self.force_refresh = True
-
     def draw(self, window_surface):
         window_surface.blit(self.__background, (0, -200))
-        self.__map.draw(window_surface)
-        self.__toolbox.draw(window_surface)
         window_surface.blit(self.__btn.image, self.__btn.rect)
         # draw mouse
         if self.tool_in_mouse:
@@ -95,8 +180,10 @@ class GamePage(PageBase):
                                 self.tool_in_mouse.rect)
         self.force_refresh = False
 
+'''
+
 
 if __name__ == '__main__':
     pm = PageManager((808, 700), 'hello')
-    pm.push(GamePage(pm, 'config/map-1.json', 'config/toolbox-1.json'))
+    pm.push(GamePage(pm, 'config/map-1.json'))
     pm.run()

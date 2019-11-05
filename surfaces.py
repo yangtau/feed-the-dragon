@@ -11,22 +11,6 @@ import sprites
 from resources.resource import load_image
 from resources.resource import load_json
 
-
-'''
-+-----> X
-|
-|
-|
-V Y
-
-index_position, position: (X, Y)
-    index_position: the index of the block in the map
-    position: the relative position represented in pixel in the map
-
-size, pixel_size
-'''
-
-
 def pair_mul(a, b):
     return (a[0] * b[0], a[1] * b[1])
 
@@ -95,21 +79,11 @@ class Surface(object):
         return (position[0] - self.rect.left, position[1] - self.rect.top)
 
 
+        
+
+
 class Map(Surface):
     '''Map
-    attr:
-        __map: two-dimensional list of tiles
-        __static_surf: background and tiles. Copy it before drawing.
-        __tools_on_map: two-dimensional list of tools in the map
-        __size: the scale of __map
-        __background: pygame image of background
-        __tile_size: size of tile
-        __hero:
-        __dragon:
-    mothed:
-        __load_config: load json configuration file
-        __render_static: render background and tiles
-        draw:
     '''
 
     def __init__(self, config: str, position: (int, int)):
@@ -137,18 +111,15 @@ class Map(Surface):
         return (self.__size[0] * self.__tile_size[0],
                 self.__size[1] * self.__tile_size[1])
 
-    def __load_config(self, config: str):
-        data = load_json(config)
+    def __load_config(self, data):
         self.__size = tuple(data['size'])
         self.__tile_size = tuple(data['tile_size'])
-        # self.__background = load_image(data['background'])
         # tiles
         tiles = data['tiles']
         for k, v in tiles.items():
             tiles[k] = Tile(v)
         for row in data['map']:
             self.__map.append([tiles[c] for c in row])
-        # TODO: abstract
         # roles
         roles = data['sprites']
         # hero

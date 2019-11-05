@@ -7,7 +7,8 @@ from functools import lru_cache
 RES_DIR = os.path.dirname(__file__)
 
 FONTS_DIR = os.path.join(RES_DIR, 'fonts/')
-THEME_DIR = os.path.join(RES_DIR, 'theme/')
+THEME_DIR = os.path.join(RES_DIR, 'themes/')
+IMAGE_DIR = os.path.join(RES_DIR, 'images/')
 
 
 @lru_cache(maxsize=64)
@@ -31,7 +32,7 @@ def get_font(font_name: str, size: int) -> pygame.font.Font:
 
 @lru_cache(maxsize=64)
 def load_image(filename: str):
-    filepath = os.path.join(RES_DIR, filename)
+    filepath = os.path.join(IMAGE_DIR, filename)
     return pygame.image.load(filepath).convert_alpha()
 
 

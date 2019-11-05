@@ -58,6 +58,46 @@
       "text_vert_alignment_padding": "5"
     }
   },
+  "up_toolbox": {
+    "images": {
+      "normal_image": {
+        "path": "resources/images/tools/up.png"
+      },
+      "disabled_image": {
+        "path": "resources/images/tools/up_disable.png"
+      }
+    }
+  },
+  "right_toolbox": {
+    "images": {
+      "normal_image": {
+        "path": "resources/images/tools/right.png"
+      },
+      "disabled_image": {
+        "path": "resources/images/tools/right_disable.png"
+      }
+    }
+  },
+  "left_toolbox": {
+    "images": {
+      "normal_image": {
+        "path": "resources/images/tools/left.png"
+      },
+      "disabled_image": {
+        "path": "resources/images/tools/left_disable.png"
+      }
+    }
+  },
+  "down_toolbox": {
+    "images": {
+      "normal_image": {
+        "path": "resources/images/tools/down.png"
+      },
+      "disabled_image": {
+        "path": "resources/images/tools/down_disable.png"
+      }
+    }
+  },
   "label": {
     "font": {
       "size": "30",
