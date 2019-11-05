@@ -66,6 +66,23 @@
       "disabled_image": {
         "path": "resources/images/tools/up_disable.png"
       }
+    },
+    "font": {
+      "name": "noto-sans",
+      "size": "20"
+    },
+    "colours": {
+      "normal_text": "#000000",
+      "hovered_text": "#000000",
+      "selected_text": "#000000",
+      "disabled_text": "#000000",
+      "active_text": "#000000"
+    },
+    "misc": {
+      "text_horiz_alignment": "right",
+      "text_vert_alignment": "bottom",
+      "text_horiz_alignment_padding": "0",
+      "text_vert_alignment_padding": "0"
     }
   },
   "right_toolbox": {
@@ -76,6 +93,23 @@
       "disabled_image": {
         "path": "resources/images/tools/right_disable.png"
       }
+    },
+    "font": {
+      "name": "noto-sans",
+      "size": "20"
+    },
+    "colours": {
+      "normal_text": "#000000",
+      "hovered_text": "#000000",
+      "selected_text": "#FFFFFF",
+      "disabled_text": "#000000",
+      "active_text": "#000000"
+    },
+    "misc": {
+      "text_horiz_alignment": "right",
+      "text_vert_alignment": "bottom",
+      "text_horiz_alignment_padding": "0",
+      "text_vert_alignment_padding": "0"
     }
   },
   "left_toolbox": {
@@ -86,6 +120,23 @@
       "disabled_image": {
         "path": "resources/images/tools/left_disable.png"
       }
+    },
+    "font": {
+      "name": "noto-sans",
+      "size": "20"
+    },
+    "colours": {
+      "normal_text": "#000000",
+      "hovered_text": "#000000",
+      "selected_text": "#000000",
+      "disabled_text": "#000000",
+      "active_text": "#000000"
+    },
+    "misc": {
+      "text_horiz_alignment": "right",
+      "text_vert_alignment": "bottom",
+      "text_horiz_alignment_padding": "0",
+      "text_vert_alignment_padding": "0"
     }
   },
   "down_toolbox": {
@@ -96,6 +147,23 @@
       "disabled_image": {
         "path": "resources/images/tools/down_disable.png"
       }
+    },
+    "font": {
+      "name": "noto-sans",
+      "size": "20"
+    },
+    "colours": {
+      "normal_text": "#000000",
+      "hovered_text": "#000000",
+      "selected_text": "#000000",
+      "disabled_text": "#000000",
+      "active_text": "#000000"
+    },
+    "misc": {
+      "text_horiz_alignment": "right",
+      "text_vert_alignment": "bottom",
+      "text_horiz_alignment_padding": "0",
+      "text_vert_alignment_padding": "0"
     }
   },
   "label": {
