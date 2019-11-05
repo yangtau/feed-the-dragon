@@ -113,8 +113,10 @@ class UIButton(UIElement):
         else:
             self.tool_tip_delay = 1.0
 
-        self.text_surface = None
-        self.aligned_text_rect = None
+        if len(self.text) > 0:
+            self.text_surface = self.font.render(self.text, True, self.text_colour)
+        else:
+            self.text_surface = None
 
         self.image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA)
 
@@ -151,27 +153,31 @@ class UIButton(UIElement):
 
     def compute_aligned_text_rect(self):
         if len(self.text) > 0:
-            # first we need to create rectangle the size of the text, if there is any text to draw
-            self.aligned_text_rect = pygame.Rect((0, 0), self.font.size(self.text))
+            self.text_surface = self.font.render(self.text, True, self.text_colour)
+        else:
+            self.text_surface = None
 
+        self.aligned_text_rect = None
+        if self.text_surface is not None:
             # horizontal
             if self.text_horiz_alignment == 'center':
-                self.aligned_text_rect.centerx = self.rect.width/2
+                self.aligned_text_rect = self.text_surface.get_rect(centerx=self.rect.width/2)
             elif self.text_horiz_alignment == 'left':
-                self.aligned_text_rect.x = self.text_horiz_alignment_padding + self.shadow_width + self.border_width
+                self.aligned_text_rect = self.text_surface.get_rect(x=self.text_horiz_alignment_padding
+                                                                    + self.shadow_width + self.border_width)
             elif self.text_horiz_alignment == 'right':
-                x_pos = (self.click_area_shape.width - self.text_horiz_alignment_padding - self.aligned_text_rect.width
+                x_pos = (self.click_area_shape.width - self.text_horiz_alignment_padding - self.text_surface.get_width()
                          - self.shadow_width - self.border_width)
-                self.aligned_text_rect. x = x_pos
+                self.aligned_text_rect = self.text_surface.get_rect(x=x_pos)
             else:
-                self.aligned_text_rect.centerx = self.rect.width/2
+                self.aligned_text_rect = self.text_surface.get_rect(centerx=self.rect.width/2)
             # vertical
             if self.text_vert_alignment == 'center':
                 self.aligned_text_rect.centery = int(self.rect.height/2)
             elif self.text_vert_alignment == 'top':
                 self.aligned_text_rect.y = (self.text_vert_alignment_padding + self.shadow_width + self.border_width)
             elif self.text_vert_alignment == 'bottom':
-                self.aligned_text_rect.y = (self.rect.height - self.aligned_text_rect.height
+                self.aligned_text_rect.y = (self.rect.height - self.text_surface.get_height()
                                             - self.text_vert_alignment_padding - self.shadow_width - self.border_width)
             else:
                 self.aligned_text_rect.centery = int(self.rect.height/2)
@@ -395,13 +401,16 @@ class UIButton(UIElement):
             image_rect = self.current_image.get_rect()
             image_rect.center = (self.rect.width/2, self.rect.height/2)
             self.image.blit(self.current_image, image_rect)
-
-        if len(self.text) > 0:
-            self.text_surface = self.font.render(self.text, True, self.text_colour)
+            if len(self.text) > 0:
+                self.text_surface = self.font.render(self.text, True, self.text_colour)
+            else:
+                self.text_surface = None
         else:
-            self.text_surface = None
-
-        if self.text_surface is not None and self.aligned_text_rect is not None:
+            if len(self.text) > 0:
+                self.text_surface = self.font.render(self.text, True, self.text_colour)
+            else:
+                self.text_surface = None
+        if self.text_surface is not None:
             self.image.blit(self.text_surface, self.aligned_text_rect)
 
     def check_pressed(self):
@@ -482,11 +491,10 @@ class UIButton(UIElement):
 
         :param text: The new text to set.
         """
-        if text != self.text:
-            self.text = text
-            # recompute aligned_text_rect before redraw
-            self.compute_aligned_text_rect()
-            self.redraw()
+        self.text = text
+        # recompute aligned_text_rect before redraw
+        self.compute_aligned_text_rect()
+        self.redraw()
 
     def set_hold_range(self, xy_range: Tuple[int, int]):
         """
