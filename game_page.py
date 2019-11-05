@@ -14,18 +14,23 @@ from resources.resource import load_image
 
 
 class Switch(object):
-    def __init__(self):
-        self.__state1 = load_image('button/pause.png')
-        self.__state0 = load_image('button/start.png')
-        self.rect = self.__state1.get_rect()
+    def __init__(self, pos: (int, int)):
+        self.__image1 = load_image('button/pause.png')
+        self.__image0 = load_image('button/start.png')
         self.__state = 0
+        self.__rect = self.__image0.get_rect()
+        self.__rect.center = pos
 
     @property
-    def image(self):
+    def rect(self):
+        return self.__rect
+
+    @property
+    def surface(self):
         if self.__state == 0:
-            return self.__state0
+            return self.__image0
         else:
-            return self.__state1
+            return self.__image1
 
     def click(self):
         self.__state = 1-self.__state
@@ -71,9 +76,11 @@ class GamePage(PageBase):
     # map
     map_pos = (20, 10)
     # toolbox
-    tool_pos = (20, 596)
+    tool_pos = (20, 606)
     tool_margin = 10
     tool_size = (64, 64)
+    # switch
+    switch_center_pos = (756, 648)
 
     def __init__(self, pm, map_config_file: str):
         super().__init__(pm)
@@ -86,13 +93,16 @@ class GamePage(PageBase):
         self.__background.blit(self.__map_surf.surface, self.map_pos)
         # toolbox
         self.__init_toolbox(map_config['toolbox'])
+        # start_rest switch
+        self.__switch = Switch(self.switch_center_pos)
+        self.__start = False
 
     def __init_toolbox(self, toolbox_config):
         '''
         toolbox_config:
         [{"name":"", "object_id":"", "numbet":1}...]
         - object_id is used in pygame_gui.elements.UIButton, and it is defined 
-        in resources/theme/theme.json.
+        in resources/themes/theme.json.
         '''
         self.__tools = dict()
         tool_poss = [(i*(self.tool_size[0]+self.tool_margin)+self.tool_pos[0],
@@ -113,17 +123,35 @@ class GamePage(PageBase):
             print(name)
         return handler
 
+    def __tool_drag_handler(self, event):
+        pass
+
+    def __btn_click(self, event):
+        btn = self.__switch
+        if event.button == 1 and btn.rect.collidepoint(pygame.mouse.get_pos()):
+            btn.click()
+            if not self.__start:
+                self.__start = True
+                # self.__map.start()
+            else:
+                self.__start = False
+                # self.__map.reset()
+
     def __update_tools(self):
         for tool in self.__tools.values():
             tool.button.set_text(str(tool.number))
             if tool.number == 0:
                 tool.button.disable()
+                tool.button.redraw()
             else:
+                # TODO: enable it only if needed
                 tool.button.enable()
+                tool.button.redraw()
 
     def draw(self, win_surf):
-        win_surf.blit(self.__background, (0, 0))
         self.__update_tools()
+        win_surf.blit(self.__background, (0, 0))
+        win_surf.blit(self.__switch.surface, self.__switch.rect)
 
         '''
         # button
@@ -136,16 +164,6 @@ class GamePage(PageBase):
         self.register_event_handler(pygame.MOUSEBUTTONDOWN, self.btn_click)
         self.register_event_handler(pygame.MOUSEBUTTONDOWN, self.drag_handler)
 
-    def btn_click(self, event):
-        btn = self.__btn
-        if event.button == 1 and btn.rect.collidepoint(pygame.mouse.get_pos()):
-            btn.click()
-            if not self.__start:
-                self.__start = True
-                self.__map.start()
-            else:
-                self.__start = False
-                self.__map.reset()
 
     def drag_handler(self, event):
         # click left
