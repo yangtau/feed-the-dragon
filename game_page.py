@@ -13,7 +13,7 @@ from resources.resource import load_json
 from resources.resource import load_image
 
 
-class Button(object):
+class Switch(object):
     def __init__(self):
         self.__state1 = load_image('button/pause.png')
         self.__state0 = load_image('button/start.png')
@@ -37,15 +37,18 @@ class GamePage(PageBase):
         self.__map = surfaces.Map(map_config_file, (20, 20))
         self.__toolbox = surfaces.Toolbox(toolbox_config_file, (20, 616))
 <<<<<<< HEAD
+<<<<<<< HEAD
         #self.__surface = pygame.Surface((808, 700), pygame.SRCALPHA, 32)
 =======
         # self.__surface = pygame.Surface((808, 700), pygame.SRCALPHA, 32)
 >>>>>>> acded441ec147a922c2b3be3cfcbd0cd6e57cc6f
+=======
+>>>>>>> 574456ab4989e4d1043697db6f65305709f786eb
         # background
-        self.__background = load_image('background/colored_forest_croped.png')
+        self.__background = load_image('background/colored_talltrees.png')
         # button
         self.__start = False
-        self.__btn = Button()
+        self.__btn = Switch()
         self.__btn.rect.center = (756, 648)
         self.tool_in_mouse = None
         self.force_refresh = False
@@ -89,7 +92,7 @@ class GamePage(PageBase):
                 self.force_refresh = True
 
     def draw(self, window_surface):
-        window_surface.blit(self.__background, (0, 0))
+        window_surface.blit(self.__background, (0, -200))
         self.__map.draw(window_surface)
         self.__toolbox.draw(window_surface)
         window_surface.blit(self.__btn.image, self.__btn.rect)
