@@ -10,20 +10,18 @@ Created on Mon Oct 14 20:01:31 2019
 
 from resources.resource import load_image
 from resources.resource import load_json
-from collections import defaultdict
 import surfaces
 import pygame
-import json
 
 class Elem(object):
-    def __init__(self, attr: dict):
-        self.__texture = load_image(attr['texture'])
+    def __init__(self, attr: dict):   
         self.__name = attr['name']
         self.__count = attr['number']
-        self.__symble = attr['symble']
+        self.__mySymbel = attr['symble']
+        self.__texture = load_image(attr['texture'])
     
-    def __getSymble(self):
-        return self.__symble
+    def getSymbel(self):
+        return self.__mySymbel
     
     @property
     def texture(self):
@@ -46,7 +44,7 @@ class Map_base(surfaces.Surface):
         self.__tools_on_map = [[None for _ in range(self.__size[0])]
                                for _ in range(self.__size[1])]
         # static_surf will never change
-        self.__static_surf = self.__render_static()
+        self.__static_surf = pygame.Surface(self.surface_size, pygame.SRCALPHA, 32)
         self.__rect = self.__static_surf.get_rect()
         self.__rect.move_ip(position)
         
@@ -63,34 +61,46 @@ class Map_base(surfaces.Surface):
         data = load_json(config)
         self.__size = tuple(data['size'])
         self.__tile_size = tuple(data['tile_size'])
-        self.__background = load_image(data['background'])
         self.__map = data['map']
         
-    def __get_ElemMap(self):
+    def get_ElemMap(self):
         elem_map = [['' for _ in range(self.__size[0])]
                                for _ in range(self.__size[1])]
-        for i in range(self.__size[0]):
-            for j in range(self.__size[1]):
+        
+        for i in range(self.__size[1]):
+            for j in range(self.__size[0]):
                 if self.__tools_on_map[i][j] == None:
                     elem_map[i][j] = '.'
-                elif self.__tools_on_map[i][j].__getSymbel() == 'H':
+                elif self.__tools_on_map[i][j].getSymbel() == 'H':
                     elem_map[i][j] = '.'
-                elif self.__tools_on_map[i][j].__getSymbel() == 'D':
-                    elem_map[i][j] = '.'    
+                elif self.__tools_on_map[i][j].getSymbel() == 'D':
+                    elem_map[i][j] = '.'
+                elif self.__tools_on_map[i][j].getSymbel() == 'P':
+                    elem_map[i][j] = '.'
                 else:
-                    elem_map[i][j] = self.__tools_on_map[i][j].__getSymbel()
+                    elem_map[i][j] = self.__tools_on_map[i][j].getSymbel()
         return elem_map
     
-    def __get_CharacterPos(self):
+    def get_CharacterPos(self):
+        characters = []
         hero_pos = []
         dragon_pos = []
-        for i in range(self.__size[0]):
-            for j in range(self.__size[1]):
-                if self.__tools_on_map[i][j].__getSymble() == 'H' :
-                    hero_pos = [i,j]
-                elif self.__tools_on_map[i][j].__getSymble() == 'D':
-                    dragon_pos = [i,j]
-        return hero_pos,dragon_pos
+        princess_pos = []
+        for i in range(self.__size[1]):
+            for j in range(self.__size[0]):
+                if self.__tools_on_map[i][j] == None:
+                    continue
+                if self.__tools_on_map[i][j].getSymbel() == 'H' :
+                     hero_pos = [j,i]
+                elif self.__tools_on_map[i][j].getSymbel() == 'D':
+                    dragon_pos = [j,i]
+                elif self.__tools_on_map[i][j].getSymbel() == 'P':
+                    princess_pos = [j,i]
+
+        characters.append(hero_pos)
+        characters.append(dragon_pos)
+        characters.append(princess_pos)
+        return characters
     
     def put_tool(self, position: (int, int), elem : Elem):
         '''Put the tool in the position
@@ -107,50 +117,6 @@ class Map_base(surfaces.Surface):
         idx_y = (relative_pos[1])//self.__tile_size[1]
         self.__tools_on_map[idx_y][idx_x] = None
 
-    def __render_static(self):
-        surface = pygame.Surface(self.surface_size, pygame.SRCALPHA, 32)
-        # draw background
-        background_size = self.__background.get_size()
-        surface.blit(self.__background,
-                     (0, self.surface_size[1]-background_size[1]))
-        
-        return surface
-
-    def save_map(self,elem_map,hero_pos,dragon_pos, map_name):
-        map_now = {}
-        map_now['size'] = [12,9]
-        map_now['tile_size'] = [64,64]
-        map_now['background'] = "background/colored_forest_croped.png"
-        map_now['map'] = elem_map
-        map_now['tiles'] = {
-                "^": {
-                      "name": "grass",
-                      "texture": "tiles/grassMid.png"
-                     },
-                ".": {
-                      "name": "blank"
-                     },
-                "$": {
-                      "name": "rock",
-                      "texture": "tiles/grassCenter.png"
-                     },
-                "w": {
-                      "name": "wall",
-                      "texture": "tiles/castleCenter.png"
-                     }
-                }
-        map_now['hero'] = {
-                "position":hero_pos,
-                "json": "hero/character.json"
-                }
-        map_now['dragon'] = {
-                "position":dragon_pos,
-                "json": "zombie/character.json"
-                }
-        filepath = 'D:\\gitRepository\\feedDragon_python\\feed-the-dragon\\resources\\config\\%s.json'%map_name
-        with open(filepath,'w') as f:
-            json.dump(map_now,f)
-
     def draw(self, surface: pygame.Surface):
         map_surf = self.__static_surf.copy()
         # draw tools
@@ -159,7 +125,7 @@ class Map_base(surfaces.Surface):
                 if tool:
                     position = (j*self.__tile_size[0], i*self.__tile_size[1])
                     map_surf.blit(tool.texture, position)
-        surface.blit(map_surf, self.__rect)
+        surface.blit(map_surf,self.__rect)
 
 
 class Elem_base(surfaces.Surface):
@@ -201,44 +167,3 @@ class Elem_base(surfaces.Surface):
 
     def draw(self, surface: pygame.Surface):      
         surface.blit(self.__static_surf, self.__rect)
-
-class Map_editer():
-
-    def run(self):
-        '''start the game'''
-        # draw background
-        self.surface.fill((255, 255, 255))
-        while True:
-            self.clock.tick(self.fps)
-            self.__event_handle()
-            if self.tool_in_mouse or self.force_refresh:
-                self.surface.fill((255, 255, 255))
-            # TODO: position
-            self.__map.draw(self.surface)
-            self.__elembox.draw(self.surface)
-            # draw mouse
-            if self.tool_in_mouse:
-                self.tool_in_mouse.rect.center = pygame.mouse.get_pos()
-                self.surface.blit(self.tool_in_mouse.texture,
-                                  self.tool_in_mouse.rect)
-            pygame.display.flip()
-            self.force_refresh = False
-            
-            # TODO: if complete to edit the map,save map and exit
-            # if conditon:
-            #    self.__elme_map = __map.__get_ElemMap()
-            #    self.__hero_pos,self.__dragon_pos = __map.__get_CharacterPos()
-            # self.save_map(self.__elme_map,self.__hero_pos,self.__dragon_pos)
-            
-
-
-
-
-if __name__ == '__main__':
-    size = (808, 700)
-    game = Map_editer('Feed the Dragon', size, 30)
-    m = Map_base('config/map_0.json', (20, 20))
-    game.set_map(m)
-    elembox = Elem_base('config/elem.json', (20, 616))
-    game.set_elembox(elembox)
-    game.run()
