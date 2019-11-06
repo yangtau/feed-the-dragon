@@ -1,12 +1,8 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Oct 14 20:01:31 2019
-@file:
-@brief:
-
+'''
 @author: 冯准生
 @email:1565853379@qq.com
-"""
+@brief:
+'''
 
 from resources.resource import load_image
 from resources.resource import load_json
