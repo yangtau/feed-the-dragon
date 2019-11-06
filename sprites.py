@@ -8,7 +8,7 @@ import pygame
 import math
 from queue import Queue
 from collections import defaultdict
-from resources.resource import load_image
+from resources.resource import load_sprite_image
 from resources.resource import load_json
 
 
@@ -277,7 +277,7 @@ class Sprite(pygame.sprite.Sprite):
 
     def __load_config_file(self, config: str):
         data = load_json(config)
-        self.__sprite_img = load_image(data['image'])
+        self.__sprite_img = load_sprite_image(data['image'])
         self.__frames_desc = data['poses']
 
     @property

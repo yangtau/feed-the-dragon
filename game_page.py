@@ -10,6 +10,7 @@ from collections import defaultdict
 from surface import MapSurface, Tool
 from page_manager import PageBase, PageManager
 from resources.resource import load_json, load_image
+from sprites import Hero, Princess, Dragon, Sprite
 
 
 class Switch(object):
@@ -35,6 +36,25 @@ class Switch(object):
         self.__state = 1-self.__state
 
 
+class Role(object):
+    name_to_cls = {'hero': Hero, 'princess': Princess, 'dragon': Dragon}
+
+    def __init__(self, conf: dict, off_map, tile_size=(64, 64)):
+        x, y = tuple(conf['position'])
+        self.__idx_pos = x, y
+        self.__sprite = self.name_to_cls[conf['name']](
+            (x*tile_size[0]+off_map[0], y*tile_size[1]+off_map[1]),
+            conf['json'])
+
+    @property
+    def sprite(self):
+        return self.__sprite
+
+    @property
+    def idx_pos(self):
+        return self.__idx_pos
+
+
 class GamePage(PageBase):
     # map
     map_pos = (20, 10)
@@ -57,6 +77,8 @@ class GamePage(PageBase):
         self.__background = load_image(map_config['background'])
         # toolbox
         self.__init_toolbox(map_config['toolbox'])
+        # roles
+        self.__init_roles(map_config['sprites'])
         # start_rest switch
         self.__switch = Switch(self.switch_center_pos)
         self.__start = False
@@ -70,6 +92,18 @@ class GamePage(PageBase):
             pygame.MOUSEBUTTONDOWN, self.__tool_drag_handler)
         # tools on map
         self.__tools_on_map = []
+
+    def __init_roles(self, roles_config):
+        '''
+        roles_config:
+        [{"name": "hero", "position":[], "json":""}...]
+        '''
+        self.__roles = {}
+        self.__role_group = pygame.sprite.Group()
+        for conf in roles_config:
+            role = Role(conf, self.map_pos, self.tile_size)
+            self.__roles[conf['name']] = role
+            self.__role_group.add(role.sprite)
 
     def __init_toolbox(self, toolbox_config):
         '''
@@ -140,6 +174,8 @@ class GamePage(PageBase):
         win_surf.blit(self.__background, (0, 0))
         win_surf.blit(self.__map_surf.surface, self.__map_surf_rect)
         win_surf.blit(self.__switch.surface, self.__switch.rect)
+        self.__role_group.draw(win_surf)
+        self.__role_group.update()
 
     def draw_after_gui(self, win_surf):
         # the tool on mouse should be drew on the top of toolbox

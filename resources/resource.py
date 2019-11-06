@@ -9,6 +9,7 @@ RES_DIR = os.path.dirname(__file__)
 FONTS_DIR = os.path.join(RES_DIR, 'fonts/')
 THEME_DIR = os.path.join(RES_DIR, 'themes/')
 IMAGE_DIR = os.path.join(RES_DIR, 'images/')
+SPRITE_DIR  =os.path.join(RES_DIR, 'sprites/')
 
 
 @lru_cache(maxsize=64)
@@ -37,11 +38,18 @@ def load_image(filename: str):
 
 
 @lru_cache(maxsize=64)
+def load_sprite_image(filename: str):
+    filepath = os.path.join(SPRITE_DIR, filename)
+    return pygame.image.load(filepath).convert_alpha()
+
+
+@lru_cache(maxsize=64)
 def load_json(filename: str):
     filepath = os.path.join(RES_DIR, filename)
     with open(filepath, encoding='utf-8') as f:
         data = json.load(f, encoding='utf-8')
     return data
+
 
 def save_json(filename: str, json_obj):
     filepath = os.path.join(RES_DIR, filename)

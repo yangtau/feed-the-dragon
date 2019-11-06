@@ -36,29 +36,32 @@
       "texture": "tiles/castleCenter.png"
     }
   },
-  "sprites": {
-    "hero": {
+  "sprites": [
+    {
+      "name": "hero",
       "position": [
         0,
         6
       ],
-      "json": "hero/character.json"
+      "json": "sprites/hero/character.json"
     },
-    "dragon": {
+    {
+      "name": "dragon",
       "position": [
-        0,
-        3
+        5,
+        1
       ],
-      "json": "zombie/character.json"
+      "json": "sprites/zombie/character.json"
     },
-    "princess": {
+    {
+      "name": "princess",
       "position": [
         11,
         6
       ],
-      "json": "princess/character.json"
+      "json": "sprites/princess/character.json"
     }
-  },
+  ],
   "toolbox": {
     "number": 4,
     "tool_size": [
