@@ -45,4 +45,4 @@ def load_json(filename: str):
 def save_json(filename: str, json_obj):
     filepath = os.path.join(__res_dir, filename)
     with open(filepath, 'w', encoding='utf-8') as f:
-        json.dump(json_obj, f, encoding='utf-8')
+        json.dump(json_obj, f)

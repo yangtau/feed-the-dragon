@@ -12,7 +12,7 @@ import json
 import pygame
 import pygame_gui
 import page_manager as pm
-from resources.resource import load_image,get_font
+from resources.resource import load_image, get_font, save_json
 
 import mapEditor
 
@@ -151,9 +151,8 @@ class MapNamePage(pm.PageBase):
                         }
                 }
 
-        filepath = 'D:\\gitRepository\\feedDragon_python\\feed-the-dragon\\resources\\config\\%s.json'%map_name
-        with open(filepath,'w') as f:
-            json.dump(map_now,f)
+        filename = 'config/%s.json'%map_name
+        save_json(filename,map_now)
     
         
 if __name__ == '__main__':
