@@ -1,4 +1,27 @@
 {
+  "defaults": {
+    "font": {
+      "name": "noto-sans",
+      "regular_path": "resources/fonts/NotoSansCJK-Regular.ttc",
+      "bold_path": "resources/fonts/NotoSansCJK-Bold.ttc",
+      "italic_path": "resources/fonts/NotoSansCJK-Regular.ttc"
+    }
+  },
+  "text_box": {
+    "colours": {
+      "dark_bg": "#99999933",
+      "border": "#ffffff00",
+      "link_text": "#FF0000",
+      "link_hover": "#FFFF00",
+      "link_selected": "#FFFFFF"
+    },
+    "misc": {
+      "border_width": "0",
+      "padding": "10,10",
+      "link_normal_underline": "0",
+      "link_hover_underline": "1"
+    }
+  },
   "button": {
     "colours": {
       "normal_bg": "#25292e",
@@ -19,10 +42,11 @@
     },
     "font": {
       "name": "noto-sans",
-      "size": "30",
       "bold": "0",
+      "size": "25",
       "regular_path": "resources/fonts/NotoSansCJK-Regular.ttc",
-      "bold_path": "resources/fonts/NotoSansCJK-Bold.ttc"
+      "bold_path": "resources/fonts/NotoSansCJK-Bold.ttc",
+      "italic_path": "resources/fonts/NotoSansCJK-Regular.ttc"
     },
     "misc": {
       "border_width": "1",
@@ -38,7 +62,10 @@
     "font": {
       "size": "30",
       "bold": "1",
-      "name": "noto-sans"
+      "name": "noto-sans",
+      "regular_path": "resources/fonts/NotoSansCJK-Regular.ttc",
+      "bold_path": "resources/fonts/NotoSansCJK-Bold.ttc",
+      "italic_path": "resources/fonts/NotoSansCJK-Regular.ttc"
     }
   },
   "drop_down_menu.#option": {

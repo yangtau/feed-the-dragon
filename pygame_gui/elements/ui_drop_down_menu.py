@@ -1,4 +1,5 @@
 import pygame
+import warnings
 from typing import Union, List
 
 from .. import ui_manager
@@ -302,6 +303,9 @@ class UIDropDownMenu(UIElement):
 
     :param options_list: The list of of options to choose from. They must be strings.
     :param starting_option: The starting option, selected when the menu is first created.
+    :param init_state: The initial state of the list.
+        - 'closed' - The list is closed.
+        - 'expanded' - The list is expanded.
     :param relative_rect: The size and position of the element when not expanded.
     :param manager: The UIManager that manages this element.
     :param container: The container that this element is within. If set to None will be the root window's container.
@@ -311,9 +315,9 @@ class UIDropDownMenu(UIElement):
 
     def __init__(self, options_list: List[str],
                  starting_option: str,
+                 init_state: str,
                  relative_rect: pygame.Rect,
                  manager: ui_manager.UIManager,
-                 init_state: str = 'closed',
                  container: ui_container.UIContainer = None,
                  parent_element: UIElement = None,
                  object_id: Union[str, None] = None
@@ -378,6 +382,8 @@ class UIDropDownMenu(UIElement):
                                                                 self.element_ids,
                                                                 self.object_ids
                                                                 )}
+        if init_state != 'closed' and init_state != 'expanded':
+            warnings.warn('Unsuppored state name: {}'.format(init_state))
         self.current_state = self.menu_states[init_state]
         self.current_state.start()
 

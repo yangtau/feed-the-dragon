@@ -4,14 +4,14 @@
 @brief:
     a page where plays select the level.
 '''
-import page_manager
-import game_page
 import pygame_gui
 import pygame
 from resources.resource import load_image, load_json, get_font
+from game_page import GamePage
+from page_manager import PageManager, PageBase
 
 
-class LevelPage(page_manager.PageBase):
+class LevelPage(PageBase):
     size = (808, 700)
     # level list
     level_list_width = 300
@@ -25,10 +25,10 @@ class LevelPage(page_manager.PageBase):
     title_text_size = 50
     title_color = (120, 120, 255)
 
-    def __init__(self, pm, level_info_file: str):
+    def __init__(self, pm):
         super().__init__(pm)
         self.__background = load_image("background/colored_forest_croped.png")
-        self.__level_info = load_json(level_info_file)
+        self.__level_info = load_json('config/level.json')
         self.__init_level_list()
         self.__init_title()
 
@@ -40,20 +40,18 @@ class LevelPage(page_manager.PageBase):
         self.__title_pos = ((self.size[0]-text.get_width())//2,
                             self.title_y_off)
 
-
     def __init_level_list(self):
         xs = [x['name'] for x in self.__level_info]
         self.__level_info = {a: b for a, b in zip(xs, self.__level_info)}
         drop_down = pygame_gui.elements.UIDropDownMenu(
-            xs, xs[0],
-            self.level_list_rect, self.gui_manager,
-            init_state='expanded')
+            xs, xs[0], 'expanded',
+            self.level_list_rect, self.gui_manager)
         self.register_gui_event_handler(
             'ui_drop_down_menu_changed', drop_down, self.__list_event_handle)
 
     def __list_event_handle(self, event):
         level_name = event.text
-        self.page_manager.push(game_page.GamePage(
+        self.page_manager.replace(GamePage(
             self.page_manager,
             self.__level_info[level_name]['map'],
             self.__level_info[level_name]['toolbox']
@@ -65,6 +63,6 @@ class LevelPage(page_manager.PageBase):
 
 
 if __name__ == '__main__':
-    pm = page_manager.PageManager((808, 700), 'level page')
-    pm.push(LevelPage(pm, 'config/level.json'))
+    pm = PageManager((808, 700), 'level page')
+    pm.push(LevelPage(pm))
     pm.run()
