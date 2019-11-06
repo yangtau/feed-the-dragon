@@ -58,5 +58,37 @@
       ],
       "json": "princess/character.json"
     }
-  }
+  },
+  "toolbox": [
+    {
+      "name": "up",
+      "object_id": "up_toolbox",
+      "texture": "tools/up.png",
+      "number": 1
+    },
+    {
+      "name": "down",
+      "object_id": "down_toolbox",
+      "texture": "tools/down.png",
+      "number": 0
+    },
+    {
+      "name": "right",
+      "object_id": "right_toolbox",
+      "texture": "tools/right.png",
+      "number": 0
+    },
+    {
+      "name": "left",
+      "object_id": "left_toolbox",
+      "texture": "tools/left.png",
+      "number": 0
+    }
+  ],
+  "tools_on_map": [
+    {
+      "name": "right",
+      "position": []
+    }
+  ]
 }

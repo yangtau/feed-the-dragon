@@ -1,10 +1,10 @@
 import pygame
-from typing import Union, List, Tuple
+from typing import Union, Tuple
 
-from .. import ui_manager
-from ..core import ui_container
-from ..core.ui_element import UIElement
-from . import ui_tool_tip
+from pygame_gui import ui_manager
+from pygame_gui.core import ui_container
+from pygame_gui.core.ui_element import UIElement
+from pygame_gui.elements import ui_tool_tip
 
 
 class UIButton(UIElement):
@@ -113,55 +113,30 @@ class UIButton(UIElement):
         else:
             self.tool_tip_delay = 1.0
 
-        if len(self.text) > 0:
-            self.text_surface = self.font.render(self.text, True, self.text_colour)
-        else:
-            self.text_surface = None
+        self.text_surface = None
+        self.aligned_text_rect = None
 
         self.image = pygame.Surface(self.rect.size, flags=pygame.SRCALPHA)
 
-        text_horiz_alignment = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'text_horiz_alignment')
+        self.text_horiz_alignment = self.ui_theme.get_misc_data(self.object_ids,
+                                                                self.element_ids, 'text_horiz_alignment')
         text_horiz_alignment_padding = self.ui_theme.get_misc_data(self.object_ids,
                                                                    self.element_ids, 'text_horiz_alignment_padding')
         if text_horiz_alignment_padding is None:
-            text_horiz_alignment_padding = 1
+            self.text_horiz_alignment_padding = 1
         else:
-            text_horiz_alignment_padding = int(text_horiz_alignment_padding)
+            self.text_horiz_alignment_padding = int(text_horiz_alignment_padding)
 
-        # this helps us draw the text aligned
-        self.aligned_text_rect = None
-        if self.text_surface is not None:
-            if text_horiz_alignment == 'center':
-                self.aligned_text_rect = self.text_surface.get_rect(centerx=self.rect.width/2)
-            elif text_horiz_alignment == 'left':
-                self.aligned_text_rect = self.text_surface.get_rect(x=text_horiz_alignment_padding
-                                                                    + self.shadow_width + self.border_width)
-            elif text_horiz_alignment == 'right':
-                x_pos = (self.click_area_shape.width - text_horiz_alignment_padding - self.text_surface.get_width()
-                         - self.shadow_width - self.border_width)
-                self.aligned_text_rect = self.text_surface.get_rect(x=x_pos)
-            else:
-                self.aligned_text_rect = self.text_surface.get_rect(centerx=self.rect.width/2)
-
-        text_vert_alignment = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'text_vert_alignment')
+        self.text_vert_alignment = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'text_vert_alignment')
         text_vert_alignment_padding = self.ui_theme.get_misc_data(self.object_ids,
                                                                   self.element_ids, 'text_vert_alignment_padding')
         if text_vert_alignment_padding is None:
-            text_vert_alignment_padding = 1
+            self.text_vert_alignment_padding = 1
         else:
-            text_vert_alignment_padding = int(text_vert_alignment_padding)
+            self.text_vert_alignment_padding = int(text_vert_alignment_padding)
 
-        if self.text_surface is not None:
-            if text_vert_alignment == 'center':
-                self.aligned_text_rect.centery = int(self.rect.height/2)
-            elif text_vert_alignment == 'top':
-                self.aligned_text_rect.y = (text_vert_alignment_padding + self.shadow_width + self.border_width)
-            elif text_vert_alignment == 'bottom':
-                self.aligned_text_rect.y = (self.rect.height - self.text_surface.get_height()
-                                            - text_vert_alignment_padding - self.shadow_width - self.border_width)
-            else:
-                self.aligned_text_rect.centery = int(self.rect.height/2)
-
+        # this helps us draw the text aligned
+        self.compute_aligned_text_rect()
         # default range at which we 'let go' of a button
         self.hold_range = (0, 0)
 
@@ -174,6 +149,33 @@ class UIButton(UIElement):
         self.set_any_images_from_theme()
 
         self.redraw()
+
+    def compute_aligned_text_rect(self):
+        if len(self.text) > 0:
+            # first we need to create rectangle the size of the text, if there is any text to draw
+            self.aligned_text_rect = pygame.Rect((0, 0), self.font.size(self.text))
+
+            # horizontal
+            if self.text_horiz_alignment == 'center':
+                self.aligned_text_rect.centerx = self.rect.width/2
+            elif self.text_horiz_alignment == 'left':
+                self.aligned_text_rect.x = self.text_horiz_alignment_padding + self.shadow_width + self.border_width
+            elif self.text_horiz_alignment == 'right':
+                x_pos = (self.click_area_shape.width - self.text_horiz_alignment_padding - self.aligned_text_rect.width
+                         - self.shadow_width - self.border_width)
+                self.aligned_text_rect. x = x_pos
+            else:
+                self.aligned_text_rect.centerx = self.rect.width/2
+            # vertical
+            if self.text_vert_alignment == 'center':
+                self.aligned_text_rect.centery = int(self.rect.height/2)
+            elif self.text_vert_alignment == 'top':
+                self.aligned_text_rect.y = (self.text_vert_alignment_padding + self.shadow_width + self.border_width)
+            elif self.text_vert_alignment == 'bottom':
+                self.aligned_text_rect.y = (self.rect.height - self.aligned_text_rect.height
+                                            - self.text_vert_alignment_padding - self.shadow_width - self.border_width)
+            else:
+                self.aligned_text_rect.centery = int(self.rect.height/2)
 
     def set_any_images_from_theme(self):
         """
@@ -394,16 +396,13 @@ class UIButton(UIElement):
             image_rect = self.current_image.get_rect()
             image_rect.center = (self.rect.width/2, self.rect.height/2)
             self.image.blit(self.current_image, image_rect)
-            if len(self.text) > 0:
-                self.text_surface = self.font.render(self.text, True, self.text_colour)
-            else:
-                self.text_surface = None
+
+        if len(self.text) > 0:
+            self.text_surface = self.font.render(self.text, True, self.text_colour)
         else:
-            if len(self.text) > 0:
-                self.text_surface = self.font.render(self.text, True, self.text_colour)
-            else:
-                self.text_surface = None
-        if self.text_surface is not None:
+            self.text_surface = None
+
+        if self.text_surface is not None and self.aligned_text_rect is not None:
             self.image.blit(self.text_surface, self.aligned_text_rect)
 
     def check_pressed(self):
@@ -439,6 +438,9 @@ class UIButton(UIElement):
         Called when we are actively clicking on the button. Changes the colours to the appropriate ones for the new
         state then redraws the button.
         """
+        if not self.is_enabled:
+            print('set_active, disable')
+            return
         self.text_colour = self.colours['active_text']
         self.background_colour = self.colours['active_bg']
         self.border_colour = self.colours['active_border']
@@ -449,6 +451,9 @@ class UIButton(UIElement):
         Called when we stop actively clicking on the button. Restores the colours to the default
         state then redraws the button.
         """
+        if not self.is_enabled:
+            print('set_inactive, disable')
+            return
         self.text_colour = self.colours['normal_text']
         self.background_colour = self.colours['normal_bg']
         self.border_colour = self.colours['normal_border']
@@ -459,6 +464,9 @@ class UIButton(UIElement):
         Called when we select focus this element. Changes the colours and image to the appropriate ones for the new
         state then redraws the button.
         """
+        if not self.is_enabled:
+            print('select, disable')
+            return
         self.is_selected = True
         self.text_colour = self.colours['selected_text']
         self.background_colour = self.colours['selected_bg']
@@ -471,6 +479,9 @@ class UIButton(UIElement):
         Called when we are no longer select focusing this element. Restores the colours and image to the default
         state then redraws the button.
         """
+        if not self.is_enabled:
+            print('unselect, disable')
+            return 
         self.is_selected = False
         self.text_colour = self.colours['normal_text']
         self.background_colour = self.colours['normal_bg']
@@ -484,8 +495,11 @@ class UIButton(UIElement):
 
         :param text: The new text to set.
         """
-        self.text = text
-        self.redraw()
+        if text != self.text:
+            self.text = text
+            # recompute aligned_text_rect before redraw
+            self.compute_aligned_text_rect()
+            self.redraw()
 
     def set_hold_range(self, xy_range: Tuple[int, int]):
         """
