@@ -7,10 +7,9 @@
 import pygame
 import pygame_gui
 from collections import defaultdict
-import surface
+from surface import MapSurface, Tool
 from page_manager import PageBase, PageManager
-from resources.resource import load_json
-from resources.resource import load_image
+from resources.resource import load_json, load_image
 
 
 class Switch(object):
@@ -36,45 +35,10 @@ class Switch(object):
         self.__state = 1-self.__state
 
 
-class Tool(object):
-    '''Tool
-    Attr:
-        texture
-        name
-    '''
-
-    def __init__(self, tool_config: dict, btn: pygame_gui.elements.UIButton):
-        self.__texture = load_image(tool_config['texture'])
-        self.__name = tool_config['name']
-        self.__count = tool_config['number']
-        self.__btn = btn
-
-    @property
-    def button(self):
-        return self.__btn
-
-    @property
-    def texture(self):
-        return self.__texture
-
-    @property
-    def number(self):
-        return self.__count
-
-    @property
-    def name(self) -> str:
-        return self.__name
-
-    def inc_num(self):
-        self.__count += 1
-
-    def dec_num(self):
-        self.__count -= 1
-
-
 class GamePage(PageBase):
     # map
     map_pos = (20, 10)
+    tile_size = (64, 64)
     # toolbox
     tool_pos = (20, 606)
     tool_margin = 10
@@ -86,16 +50,26 @@ class GamePage(PageBase):
         super().__init__(pm)
         map_config = load_json(map_config_file)
         # map
-        self.__map_surf = surface.MapSurface(map_config)
+        self.__map_surf = MapSurface(map_config)
+        self.__map_surf_rect = self.__map_surf.surface.get_rect()
+        self.__map_surf_rect.move_ip(self.map_pos)
         # background
         self.__background = load_image(map_config['background'])
-        # draw map on background, reduce one blit call
-        self.__background.blit(self.__map_surf.surface, self.map_pos)
         # toolbox
         self.__init_toolbox(map_config['toolbox'])
         # start_rest switch
         self.__switch = Switch(self.switch_center_pos)
         self.__start = False
+        self.register_event_handler(
+            pygame.MOUSEBUTTONDOWN, self.__switch_click_handler)
+        # tool on mouse
+        self.__tool_on_mouse = None
+        self.__tool_on_mouse_rect = None
+        # drag handler
+        self.register_event_handler(
+            pygame.MOUSEBUTTONDOWN, self.__tool_drag_handler)
+        # tools on map
+        self.__tools_on_map = []
 
     def __init_toolbox(self, toolbox_config):
         '''
@@ -120,13 +94,38 @@ class GamePage(PageBase):
     def __get_tool_click_handler(self, name) -> callable:
         '''Return a gui event handler'''
         def handler(event):
-            print(name)
+            if self.__tool_on_mouse:
+                return  # do nothing if there is already a tool on mouse
+            tool = self.__tools[name]
+            self.__tool_on_mouse = tool
+            self.__tool_on_mouse_rect = tool.texture.get_rect()
+            tool.dec_num()
         return handler
 
     def __tool_drag_handler(self, event):
-        pass
+        # click lift
+        if event.button == 1:
+            mous_x, mous_y = pygame.mouse.get_pos()
+            if self.__map_surf_rect.collidepoint(mous_x, mous_y):
+                map_x, map_y = self.map_pos
+                rela_pos = (mous_x-map_x, mous_y-map_y)
+                if self.__tool_on_mouse is not None:
+                    # put down a tool
+                    if self.__map_surf.put_tool(self.__tool_on_mouse, rela_pos):
+                        # self.__tool_on_mouse.dec_num()
+                        self.__tool_on_mouse = None
+                else:
+                    # remove tool
+                    tool = self.__map_surf.remove_tool(rela_pos)
+                    if tool is not None:
+                        tool.inc_num()
+        # click right
+        if event.button == 3 and self.__tool_on_mouse is not None:
+            # throw the tool on mouse
+            self.__tool_on_mouse.inc_num()
+            self.__tool_on_mouse = None
 
-    def __btn_click(self, event):
+    def __switch_click_handler(self, event):
         btn = self.__switch
         if event.button == 1 and btn.rect.collidepoint(pygame.mouse.get_pos()):
             btn.click()
@@ -137,68 +136,17 @@ class GamePage(PageBase):
                 self.__start = False
                 # self.__map.reset()
 
-    def __update_tools(self):
-        for tool in self.__tools.values():
-            tool.button.set_text(str(tool.number))
-            if tool.number == 0:
-                tool.button.disable()
-                tool.button.redraw()
-            else:
-                # TODO: enable it only if needed
-                tool.button.enable()
-                tool.button.redraw()
-
     def draw(self, win_surf):
-        self.__update_tools()
         win_surf.blit(self.__background, (0, 0))
+        win_surf.blit(self.__map_surf.surface, self.__map_surf_rect)
         win_surf.blit(self.__switch.surface, self.__switch.rect)
 
-        '''
-        # button
-        self.__start = False
-        self.__btn = Switch()
-        self.__btn.rect.center = (756, 648)
-        self.tool_in_mouse = None
-        self.force_refresh = False
-        # register event handlers
-        self.register_event_handler(pygame.MOUSEBUTTONDOWN, self.btn_click)
-        self.register_event_handler(pygame.MOUSEBUTTONDOWN, self.drag_handler)
-
-
-    def drag_handler(self, event):
-        # click left
-        if event.button == 1:
-            mouse_pos = pygame.mouse.get_pos()
-            if self.__map.rect.collidepoint(mouse_pos):
-                if self.tool_in_mouse:
-                    # put down a tool
-                    # TODO: what if there is already a tool in the mouse_pos
-                    self.__map.put_tool(mouse_pos, self.tool_in_mouse)
-                    self.tool_in_mouse = None
-                else:
-                    # remove tool
-                    self.__map.remove_tool(mouse_pos)
-            if self.__toolbox.rect.collidepoint(mouse_pos):
-                if not self.tool_in_mouse:
-                    self.tool_in_mouse = self.__toolbox.get_tool(mouse_pos)
-                    self.tool_in_mouse.rect = self.tool_in_mouse.texture.get_rect()
-        # click right
-        if event.button == 3:
-            # throw away tool in hand
-            if self.tool_in_mouse:
-                self.tool_in_mouse = None
-                self.force_refresh = True
-    def draw(self, window_surface):
-        window_surface.blit(self.__background, (0, -200))
-        window_surface.blit(self.__btn.image, self.__btn.rect)
-        # draw mouse
-        if self.tool_in_mouse:
-            self.tool_in_mouse.rect.center = pygame.mouse.get_pos()
-            window_surface.blit(self.tool_in_mouse.texture,
-                                self.tool_in_mouse.rect)
-        self.force_refresh = False
-
-'''
+    def draw_after_gui(self, win_surf):
+        # the tool on mouse should be drew on the top of toolbox
+        if self.__tool_on_mouse:
+            self.__tool_on_mouse_rect.center = pygame.mouse.get_pos()
+            win_surf.blit(self.__tool_on_mouse.texture,
+                          self.__tool_on_mouse_rect)
 
 
 if __name__ == '__main__':
