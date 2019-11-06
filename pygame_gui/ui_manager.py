@@ -26,7 +26,7 @@ class UIManager:
         self.last_focused_vertical_scrollbar = None
 
         self.ui_window_stack = UIWindowStack(self.window_resolution)
-        UIWindow(pygame.Rect((0, 0), self.window_resolution), self)
+        UIWindow(pygame.Rect((0, 0), self.window_resolution), self, ['root_window'])
 
         self.shadow_generator = ShadowGenerator()
 
@@ -52,13 +52,15 @@ class UIManager:
         """
         return self.ui_window_stack
 
-    def get_shadow(self, size: Tuple[int, int]) -> pygame.Surface:
+    def get_shadow(self, size: Tuple[int, int], shadow_width: int = 2) -> pygame.Surface:
         """
         Returns a 'shadow' surface scaled to the requested size.
-        :param size:
-        :return:
+
+        :param size: The size of the object we are shadowing + it's shadow.
+        :param shadow_width: The width of the shadowed edge.
+        :return: A shadow.
         """
-        return self.shadow_generator.find_closest_shadow_scale_to_size(size)
+        return self.shadow_generator.find_closest_shadow_scale_to_size(size, shadow_width)
 
     def set_window_resolution(self, window_resolution):
         self.window_resolution = window_resolution
@@ -70,7 +72,7 @@ class UIManager:
         """
         self.ui_window_stack.clear()
         self.ui_window_stack = UIWindowStack(self.window_resolution)
-        UIWindow(pygame.Rect((0, 0), self.window_resolution), self)
+        UIWindow(pygame.Rect((0, 0), self.window_resolution), self, ['root_window'])
 
     def process_events(self, event: pygame.event.Event):
         """

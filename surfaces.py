@@ -141,7 +141,7 @@ class Map(Surface):
         data = load_json(config)
         self.__size = tuple(data['size'])
         self.__tile_size = tuple(data['tile_size'])
-        self.__background = load_image(data['background'])
+        # self.__background = load_image(data['background'])
         # tiles
         tiles = data['tiles']
         for k, v in tiles.items():
@@ -200,9 +200,9 @@ class Map(Surface):
     def __render_static(self):
         surface = pygame.Surface(self.surface_size, pygame.SRCALPHA, 32)
         # draw background
-        background_size = self.__background.get_size()
-        surface.blit(self.__background,
-                     (0, self.surface_size[1]-background_size[1]))
+        #  background_size = self.__background.get_size()
+        #  surface.blit(self.__background,
+        #             (0, self.surface_size[1]-background_size[1]))
         # draw tiles
         for i, row in enumerate(self.__map):
             for j, tile in enumerate(row):

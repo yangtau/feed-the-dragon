@@ -38,9 +38,21 @@
     "font": {
       "size": "30",
       "bold": "1",
+      "name": "noto-sans"
+    }
+  },
+  "drop_down_menu.#option": {
+    "font": {
       "name": "noto-sans",
-      "regular_path": "resources/fonts/NotoSansCJK-Regular.ttc",
-      "bold_path": "resources/fonts/NotoSansCJK-Bold.ttc"
+      "size": "25",
+      "bold": "0"
+    }
+  },
+  "drop_down_menu.#selected_option": {
+    "font": {
+      "name": "noto-sans",
+      "size": "25",
+      "bold": "0"
     }
   }
 }

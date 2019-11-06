@@ -20,44 +20,43 @@ class UITooltip(UIElement):
     :param html_text: Text styled with HTML, to be displayed on the tooltip.
     :param hover_distance: Distance in pixels between the tooltip and the thing being hovered.
     :param manager: The UIManager that manages this element.
-    :param element_ids: A list of ids that describe the 'journey' of UIElements that this UIElement is part of.
+    :param parent_element: The element this element 'belongs to' in the theming hierarchy.
     :param object_id: A custom defined ID for fine tuning of theming.
     """
     def __init__(self, html_text: str, hover_distance: Tuple[int, int],
                  manager: ui_manager.UIManager,
-                 element_ids: Union[List[str], None] = None, object_id: Union[str, None] = None):
-        width = 170
-        if element_ids is None:
-            new_element_ids = ['tool_tip']
-        else:
-            new_element_ids = element_ids.copy()
-            new_element_ids.append('tool_tip')
-        super().__init__(relative_rect=pygame.Rect((0, 0), (width, -1)),
+                 parent_element: UIElement = None,
+                 object_id: Union[str, None] = None):
+
+        new_element_ids, new_object_ids = self.create_valid_ids(parent_element=parent_element,
+                                                                object_id=object_id,
+                                                                element_id='tool_tip')
+        super().__init__(relative_rect=pygame.Rect((0, 0), (-1, -1)),
                          manager=manager,
                          container=None,
                          starting_height=manager.get_sprite_group().get_top_layer(),
                          layer_thickness=1,
                          element_ids=new_element_ids,
-                         object_id=object_id)
+                         object_ids=new_object_ids)
 
-        self.horiz_shadow_spacing = 2
-        self.vert_shadow_spacing = 2
+        rect_width = 170
+        rect_width_string = self.ui_theme.get_misc_data(self.object_ids, self.element_ids, 'rect_width')
+        if rect_width_string is not None:
+            rect_width = int(rect_width_string)
+
         self.hover_distance_from_target = hover_distance
         self.text_block = ui_text_box.UITextBox(html_text,
-                                                pygame.Rect(self.horiz_shadow_spacing,
-                                                            self.vert_shadow_spacing,
-                                                            width - (2 * self.horiz_shadow_spacing), -1),
+                                                pygame.Rect(0, 0, rect_width, -1),
                                                 manager=self.ui_manager,
                                                 layer_starting_height=self._layer+1,
-                                                element_ids=self.element_ids,
-                                                object_id=self.object_id)
+                                                parent_element=self)
 
-        height = self.text_block.rect.height + (2 * self.vert_shadow_spacing)
-
-        self.rect.height = height
+        self.relative_rect.height = self.text_block.rect.height
+        self.relative_rect.width = self.text_block.rect.width
+        self.rect.width = self.text_block.rect.width
+        self.rect.height = self.text_block.rect.height
         # Get a shadow from the shadow generator
-        self.image = self.ui_manager.get_shadow(self.rect.size)
-        self.image.fill(pygame.Color(0,0,0,0), self.text_block.rect)
+        self.image = pygame.Surface((0, 0))
 
     def kill(self):
         """
@@ -88,8 +87,8 @@ class UITooltip(UIElement):
         self.rect.top = position.y + self.hover_distance_from_target[1]
 
         if window_rect.contains(self.rect):
-            self.text_block.rect.x = self.rect.x + self.horiz_shadow_spacing
-            self.text_block.rect.y = self.rect.y + self.vert_shadow_spacing
+            self.text_block.rect.x = self.rect.x
+            self.text_block.rect.y = self.rect.y
             return True
         else:
             if self.rect.bottom > window_rect.bottom:
@@ -100,8 +99,8 @@ class UITooltip(UIElement):
                 self.rect.left = window_rect.left + self.hover_distance_from_target[0]
 
         if window_rect.contains(self.rect):
-            self.text_block.rect.x = self.rect.x + self.horiz_shadow_spacing
-            self.text_block.rect.y = self.rect.y + self.vert_shadow_spacing
+            self.text_block.rect.x = self.rect.x
+            self.text_block.rect.y = self.rect.y
             return True
         else:
             return False
