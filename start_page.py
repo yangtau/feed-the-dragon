@@ -4,19 +4,18 @@
 @brief:
     the entrance page of the game
 '''
-import page_manager as pm
 import pygame_gui
 import pygame
-import game_page
-import level_page
-from resources.resource import load_json, load_image, FONTS_DIR, THEME_DIR, get_font
+from backgroud_info_page import BackgroundInfoPage
+from page_manager import PageManager, PageBase
+from resources.resource import load_json, load_image, get_font
 
 
-class StartPage(pm.PageBase):
+class StartPage(PageBase):
     size = (808, 700)
     # button size and pos
     btn_size = (160, 60)
-    btn_margin = 40
+    btn_margin = 30
     btn_y_off = 300
     btn_x_off = (size[0] - btn_size[0]) / 2
     # title
@@ -25,9 +24,8 @@ class StartPage(pm.PageBase):
     title_text_size = 50
     title_color = (120, 120, 255)
 
-    def __init__(self, pm: pm.PageManager):
+    def __init__(self, pm: PageManager):
         super().__init__(pm)
-        # self.gui_manager.set_theme(THEME_DIR+'theme.json')
         # background
         self.__background = load_image("background/colored_forest_croped.png")
         # init button
@@ -49,11 +47,10 @@ class StartPage(pm.PageBase):
         # start button
         self.__start_btn = pygame_gui.elements.UIButton(
             btn_rect[0], "开始!", self.gui_manager)
-        lp = level_page.LevelPage(self.page_manager, 'config/level.json')
         self.register_gui_event_handler(
             'ui_button_pressed',
             self.__start_btn,
-            lambda e: self.page_manager.push(lp))
+            lambda e: self.page_manager.push(BackgroundInfoPage(self.page_manager)))
         # setting button
         self.__setting_btn = pygame_gui.elements.UIButton(
             btn_rect[1], "设置", self.gui_manager)
@@ -79,6 +76,6 @@ class StartPage(pm.PageBase):
 
 
 if __name__ == '__main__':
-    page_manager = pm.PageManager((808, 700), 'Hello')
+    page_manager = PageManager((808, 700), 'Hello')
     page_manager.push(StartPage(page_manager))
     page_manager.run()

@@ -8,7 +8,7 @@ import pygame
 import pygame_gui
 from collections import defaultdict
 import surfaces
-import page_manager 
+from page_manager import PageBase, PageManager
 from resources.resource import load_json
 from resources.resource import load_image
 
@@ -31,12 +31,16 @@ class Button(object):
         self.__state = 1-self.__state
 
 
-class GamePage(page_manager.PageBase):
+class GamePage(PageBase):
     def __init__(self, pm, map_config_file: str, toolbox_config_file: str):
         super().__init__(pm)
         self.__map = surfaces.Map(map_config_file, (20, 20))
         self.__toolbox = surfaces.Toolbox(toolbox_config_file, (20, 616))
+<<<<<<< HEAD
         #self.__surface = pygame.Surface((808, 700), pygame.SRCALPHA, 32)
+=======
+        # self.__surface = pygame.Surface((808, 700), pygame.SRCALPHA, 32)
+>>>>>>> acded441ec147a922c2b3be3cfcbd0cd6e57cc6f
         # background
         self.__background = load_image('background/colored_forest_croped.png')
         # button
@@ -96,8 +100,8 @@ class GamePage(page_manager.PageBase):
                                 self.tool_in_mouse.rect)
         self.force_refresh = False
 
+
 if __name__ == '__main__':
-    pm = page_manager.PageManager((808, 700), 'hello')
+    pm = PageManager((808, 700), 'hello')
     pm.push(GamePage(pm, 'config/map-1.json', 'config/toolbox-1.json'))
     pm.run()
-    
