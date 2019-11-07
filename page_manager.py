@@ -25,10 +25,15 @@ class PageBase(object):
         '''Subclass should override this method'''
         pass
 
+    def draw_after_gui(self, window_surface: pygame.Surface):
+        '''Override this if you want draw something on the top of gui elements'''
+        pass
+
     def update(self, window_surface, time_delta):
         self.__gui_manager.update(time_delta)
         self.draw(window_surface)
         self.__gui_manager.draw_ui(window_surface)
+        self.draw_after_gui(window_surface)
 
     def register_event_handler(self, event_id: int, handler: callable):
         '''Register a normal event handler.
@@ -80,7 +85,7 @@ class PageManager(object):
            and it will be displayed in the next loop
         '''
         self.__page_stack.append(page)
-    
+
     def replace(self, page: PageBase):
         '''Replace the current top page with `page`'''
         self.__page_stack[-1] = page

@@ -44,8 +44,7 @@ class LevelPage(PageBase):
         xs = [x['name'] for x in self.__level_info]
         self.__level_info = {a: b for a, b in zip(xs, self.__level_info)}
         drop_down = pygame_gui.elements.UIDropDownMenu(
-            xs, xs[0], 'expanded',
-            self.level_list_rect, self.gui_manager)
+            xs, xs[0], self.level_list_rect, self.gui_manager, 'expanded')
         self.register_gui_event_handler(
             'ui_drop_down_menu_changed', drop_down, self.__list_event_handle)
 

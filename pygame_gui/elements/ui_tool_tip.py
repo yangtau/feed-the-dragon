@@ -1,10 +1,10 @@
 import pygame
 import pygame.gfxdraw
-from typing import List, Union, Tuple
+from typing import Union, Tuple
 
-from .. import ui_manager
-from ..core.ui_element import UIElement
-from ..elements import ui_text_box
+from pygame_gui import ui_manager
+from pygame_gui.core.ui_element import UIElement
+from pygame_gui.elements import ui_text_box
 
 
 class UITooltip(UIElement):
