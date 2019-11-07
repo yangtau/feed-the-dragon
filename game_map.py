@@ -1,3 +1,9 @@
+'''
+@author: yangtau
+@email: yanggtau+fd@gmail.com
+@brief:
+    Map
+'''
 from resources.resource import load_image
 import pygame
 import pygame_gui
@@ -104,23 +110,42 @@ class MapSurface(object):
     def __load_config(self, config: dict):
         self.__map = []
         # tiles
+        w, h = tuple(config['tile_size'])
+        self.__tile_size = (w, h)
         tiles = config['tiles']
         for k, v in tiles.items():
             tiles[k] = Tile(v)
         # map
         for row in config['map']:
             self.__map.append([tiles[c] for c in row])
-        # surface_size
-        tile_size = tuple(config['tile_size'])
-        self.__tile_size = tile_size
-        self.__surf_size = (tile_size[0] * len(self.__map[0]),
-                            tile_size[1] * len(self.__map))
+        row, col = len(self.__map[0]), len(self.__map)
+        self.__map_size = row, col
+        self.__surf_size = row*w, col*h
         # tools on map
-        self.__tool_on_map = [[None for _ in range(len(self.__map[0]))]
-                              for _ in range(len(self.__map))]
+        self.__tool_on_map = [[None for _ in range(row)] for _ in range(col)]
 
     def is_block(self, idx_pos: (int, int)) -> bool:
-        return self.__map[idx_pos[1]][idx_pos[0]].is_block
+        '''Return true if there is a block or a tool, or the position 
+           is out of map.
+        '''
+        x, y = idx_pos
+        xl, yl = self.__map_size
+        if x < 0 or y < 0 or x >= xl or y >= yl:
+            return True
+        return self.__map[y][x].is_block \
+            or self.__tool_on_map[y][x] != None
+
+    def get_tool_name(self, idx_pos: (int, int)):
+        x, y = idx_pos
+        xl, yl = self.__map_size
+        if x < 0 or y < 0 or x >= xl or y >= yl or\
+                self.__tool_on_map[y][x] is None:
+            return None
+        return self.__tool_on_map[y][x].name
+
+    @property
+    def map_size(self):
+        return self.__map_size
 
     def position_to_index(self, pos: (int, int)) -> (int, int):
         w, h = self.__tile_size

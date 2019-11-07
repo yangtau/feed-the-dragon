@@ -1,15 +1,17 @@
 '''
 @author: yangtau
-@mail: yanggtau+fd@gmail.com
+@email: yanggtau+fd@gmail.com
 @brief:
     the page where players play the game
 '''
 import pygame
 import pygame_gui
 from collections import defaultdict
-from surface import MapSurface, Tool
+from game_map import MapSurface, Tool
 from page_manager import PageBase, PageManager
 from resources.resource import load_json, load_image
+from sprites import Hero, Princess, Dragon, Sprite, Fall, Jump, Walk, Fly, FallDown
+from game_control import Contoller
 
 
 class Switch(object):
@@ -35,6 +37,53 @@ class Switch(object):
         self.__state = 1-self.__state
 
 
+class Role(object):
+    name_to_cls = {'hero': Hero, 'princess': Princess, 'dragon': Dragon}
+    action_cls = {'fall': Fall, 'jump': Jump,
+                  'fly': Fly, 'walk': Walk, 'fall_down': FallDown}
+
+    def __init__(self, conf: dict, off_map, tile_size=(64, 64)):
+        self.__init_pos = tuple(conf['position'])
+        self.__tile_size = tile_size
+        self.__off_map = off_map
+        self.__sprite = self.name_to_cls[conf['name']](
+            self.__idx_to_pos(self.__init_pos), conf['json'])
+
+    def __idx_to_pos(self, pos: (int, int)):
+        return (pos[0]*self.__tile_size[0]+self.__off_map[0],
+                pos[1]*self.__tile_size[1]+self.__off_map[1])
+
+    @property
+    def init_pos(self):
+        return self.__init_pos
+
+    @property
+    def sprite(self):
+        return self.__sprite
+
+    def add_to_group(self, group):
+        group.add(self.__sprite)
+
+    def reset(self):
+        self.__sprite.clear_actions()
+        self.__sprite.position = self.__idx_to_pos(self.__init_pos)
+
+    def clear_actions(self):
+        self.__sprite.clear_actions()
+
+    def add_action(self, active_name: str, des_idx_pos=None):
+        if active_name == 'fall_down':
+            x, y = self.__sprite.position
+            des_pos = x, y+600
+            self.__sprite.add_action(FallDown(des_pos))
+        else:
+            self.__sprite.add_action(self.action_cls[active_name](
+                self.__idx_to_pos(des_idx_pos)))
+
+    def collide(self, other):
+        return self.sprite.rect.colliderect(other.sprite.rect)
+
+
 class GamePage(PageBase):
     # map
     map_pos = (20, 10)
@@ -57,9 +106,10 @@ class GamePage(PageBase):
         self.__background = load_image(map_config['background'])
         # toolbox
         self.__init_toolbox(map_config['toolbox'])
+        # roles
+        self.__init_roles(map_config['sprites'])
         # start_rest switch
         self.__switch = Switch(self.switch_center_pos)
-        self.__start = False
         self.register_event_handler(
             pygame.MOUSEBUTTONDOWN, self.__switch_click_handler)
         # tool on mouse
@@ -68,8 +118,20 @@ class GamePage(PageBase):
         # drag handler
         self.register_event_handler(
             pygame.MOUSEBUTTONDOWN, self.__tool_drag_handler)
-        # tools on map
-        self.__tools_on_map = []
+        # controller
+        self.__controller = Contoller(self.__map_surf, self.__roles)
+
+    def __init_roles(self, roles_config):
+        '''
+        roles_config:
+        [{"name": "hero", "position":[], "json":""}...]
+        '''
+        self.__roles = {}
+        self.__role_group = pygame.sprite.Group()
+        for conf in roles_config:
+            role = Role(conf, self.map_pos, self.tile_size)
+            self.__roles[conf['name']] = role
+            role.add_to_group(self.__role_group)
 
     def __init_toolbox(self, toolbox_config):
         '''
@@ -129,17 +191,21 @@ class GamePage(PageBase):
         btn = self.__switch
         if event.button == 1 and btn.rect.collidepoint(pygame.mouse.get_pos()):
             btn.click()
-            if not self.__start:
-                self.__start = True
-                # self.__map.start()
-            else:
-                self.__start = False
-                # self.__map.reset()
+            state = self.__controller.state
+            if state == 'inactive':
+                self.__controller.start()
+            elif state == 'active':
+                self.__controller.reset_state()
 
     def draw(self, win_surf):
         win_surf.blit(self.__background, (0, 0))
         win_surf.blit(self.__map_surf.surface, self.__map_surf_rect)
         win_surf.blit(self.__switch.surface, self.__switch.rect)
+        # game state check
+        self.__controller.state_check()
+        # roles
+        self.__role_group.draw(win_surf)
+        self.__role_group.update()
 
     def draw_after_gui(self, win_surf):
         # the tool on mouse should be drew on the top of toolbox
