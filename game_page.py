@@ -217,5 +217,5 @@ class GamePage(PageBase):
 
 if __name__ == '__main__':
     pm = PageManager((808, 700), 'hello')
-    pm.push(GamePage(pm, 'config/map-1.json'))
+    pm.push(GamePage(pm, 'config/map_1.json'))
     pm.run()

@@ -8,6 +8,7 @@ import pygame_gui
 import pygame
 from backgroud_info_page import BackgroundInfoPage
 from page_manager import PageManager, PageBase
+from map_editor_page import EditorPage
 from resources.resource import load_json, load_image, get_font
 
 
@@ -54,15 +55,17 @@ class StartPage(PageBase):
         # setting button
         self.__setting_btn = pygame_gui.elements.UIButton(
             btn_rect[1], "设置", self.gui_manager)
-        self.register_gui_event_handler('ui_button_pressed',
-                                        self.__setting_btn,
-                                        lambda e: print('setting'))
+        self.register_gui_event_handler(
+            'ui_button_pressed',
+            self.__setting_btn,
+            lambda e: print('setting'))
         # map editor button
         self.__map_editor_btn = pygame_gui.elements.UIButton(
             btn_rect[2], "地图编辑", self.gui_manager)
-        self.register_gui_event_handler('ui_button_pressed',
-                                        self.__map_editor_btn,
-                                        lambda e: print('map editor'))
+        self.register_gui_event_handler(
+            'ui_button_pressed',
+            self.__map_editor_btn,
+            lambda e: self.page_manager.push(EditorPage(self.page_manager)))
         # quit button
         self.__quit_btn = pygame_gui.elements.UIButton(
             btn_rect[3], "退出", self.gui_manager)

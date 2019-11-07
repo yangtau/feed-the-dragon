@@ -1,10 +1,10 @@
 [
   {
     "name": "教学关",
-    "map": "config/map-1.json"
+    "map": "config/map_1.json"
   },
   {
     "name": "第二关",
-    "map": "config/map-2.json"
+    "map": "config/map_2.json"
   }
 ]

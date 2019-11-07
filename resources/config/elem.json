@@ -1,1 +1,0 @@
-{"elem_number": 3, "elem_size": [64, 64], "elem_name": ["wall", "hero", "dragon"], "elem": {"wall": {"name": "wall", "texture": "tiles/castleCenter.png", "number": 50, "symble": "W"}, "hero": {"name": "hero", "texture": "hero/hero.png", "number": 1, "symble": "H"}, "dragon": {"name": "dragon", "texture": "zombie/dragon.png", "number": 1, "symble": "D"}}}
