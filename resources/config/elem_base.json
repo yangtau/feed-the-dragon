@@ -11,19 +11,19 @@
      },
     "dragon": {
       "name": "dragon", 
-      "texture": "zombie/dragon.png", 
+      "texture": "map_editor/dragon.png", 
       "number": 1, 
       "symble": "D"
       }, 
     "hero": {
       "name": "hero",
-      "texture": "hero/hero.png", 
+      "texture": "map_editor/hero.png", 
       "number": 1, 
       "symble": "H"
      }, 
     "princess": {
       "name": "princess", 
-      "texture": "princess/princess.png", 
+      "texture": "map_editor/princess.png", 
       "number": 1, 
       "symble": "P"
      }  

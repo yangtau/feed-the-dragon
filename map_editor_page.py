@@ -155,5 +155,5 @@ class MapNamePage(pm.PageBase):
         
 if __name__ == '__main__':
     pm1 = pm.PageManager((808, 700), 'hello')
-    pm1.push(EditorPage(pm1, 'images/map_editor/map_base.json', 'images/map_editor/elem_base.json'))
+    pm1.push(EditorPage(pm1, 'config/map_base.json', 'config/elem_base.json'))
     pm1.run()
