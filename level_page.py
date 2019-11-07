@@ -52,8 +52,7 @@ class LevelPage(PageBase):
         level_name = event.text
         self.page_manager.replace(GamePage(
             self.page_manager,
-            self.__level_info[level_name]['map'],
-            self.__level_info[level_name]['toolbox']
+            self.__level_info[level_name]['map']
         ))
 
     def draw(self, window_surface):

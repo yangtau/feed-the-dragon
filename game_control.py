@@ -3,6 +3,10 @@
 @email: yanggtau@gmail.com
 @brief:
     The controller of the game
+TODO:
+    1.the effect between two tools.
+    2.state detect by the path the hero pass.
+    3.open fail_page or succeed_page when the game ends.
 '''
 import pygame
 from queue import Queue

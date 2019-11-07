@@ -65,8 +65,8 @@ class Role(object):
         group.add(self.__sprite)
 
     def reset(self):
-        self.__sprite.position = self.__idx_to_pos(self.__init_pos)
         self.__sprite.clear_actions()
+        self.__sprite.position = self.__idx_to_pos(self.__init_pos)
 
     def clear_actions(self):
         self.__sprite.clear_actions()
