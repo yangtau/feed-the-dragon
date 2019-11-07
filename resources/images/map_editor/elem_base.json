@@ -1,0 +1,31 @@
+{
+  "elem_number": 4, 
+  "elem_size": [64, 64], 
+  "elem_name": ["wall", "hero","dragon","princess"], 
+  "elem": {
+    "wall": {
+      "name": "wall", 
+      "texture": "tiles/castleCenter.png", 
+      "number": 50, 
+      "symble": "w"
+     },
+    "dragon": {
+      "name": "dragon", 
+      "texture": "map_editor/dragon.png", 
+      "number": 1, 
+      "symble": "D"
+      }, 
+    "hero": {
+      "name": "hero",
+      "texture": "map_editor/hero.png", 
+      "number": 1, 
+      "symble": "H"
+     }, 
+    "princess": {
+      "name": "princess", 
+      "texture": "map_editor/princess.png", 
+      "number": 1, 
+      "symble": "P"
+     }  
+  }
+}
