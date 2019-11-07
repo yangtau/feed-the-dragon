@@ -8,19 +8,17 @@ Created on Mon Nov  4 09:17:12 2019
 @email:1565853379@qq.com
 """
 
-import json
 import pygame
 import pygame_gui
 import page_manager as pm
 from resources.resource import load_image, get_font, save_json
-
-import mapEditor
+import map_editor
 
 class EditorPage(pm.PageBase):
     def __init__(self, pm, map_config_file: str, toolbox_config_file: str):
         super().__init__(pm)
-        self.__map = mapEditor.Map_base(map_config_file, (20, 20))
-        self.__elembox = mapEditor.Elem_base(toolbox_config_file, (20, 616))
+        self.__map = map_editor.Map_base(map_config_file, (20, 20))
+        self.__elembox = map_editor.Elem_base(toolbox_config_file, (20, 616))
         self.__background = load_image('background/colored_forest_croped.png')
         self.tool_in_mouse = None
         self.force_refresh = False
@@ -157,5 +155,5 @@ class MapNamePage(pm.PageBase):
         
 if __name__ == '__main__':
     pm1 = pm.PageManager((808, 700), 'hello')
-    pm1.push(EditorPage(pm1, 'map_editor/map_base.json', 'map_editor/elem_base.json'))
+    pm1.push(EditorPage(pm1, 'images/map_editor/map_base.json', 'images/map_editor/elem_base.json'))
     pm1.run()
