@@ -1,3 +1,9 @@
+'''
+@author: yangtau
+@email: yanggtau+fd@gmail.com
+@brief:
+    PageBase and PageManager
+'''
 import pygame
 import pygame_gui
 from collections import defaultdict

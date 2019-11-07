@@ -1,6 +1,6 @@
 '''
 @author: yangtau
-@mail: yanggtau+fd@gmail.com
+@email: yanggtau+fd@gmail.com
 @brief:
     a page where plays select the level.
 '''
