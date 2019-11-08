@@ -439,7 +439,6 @@ class UIButton(UIElement):
         state then redraws the button.
         """
         if not self.is_enabled:
-            print('set_active, disable')
             return
         self.text_colour = self.colours['active_text']
         self.background_colour = self.colours['active_bg']
@@ -452,7 +451,6 @@ class UIButton(UIElement):
         state then redraws the button.
         """
         if not self.is_enabled:
-            print('set_inactive, disable')
             return
         self.text_colour = self.colours['normal_text']
         self.background_colour = self.colours['normal_bg']
@@ -465,7 +463,6 @@ class UIButton(UIElement):
         state then redraws the button.
         """
         if not self.is_enabled:
-            print('select, disable')
             return
         self.is_selected = True
         self.text_colour = self.colours['selected_text']
@@ -480,7 +477,6 @@ class UIButton(UIElement):
         state then redraws the button.
         """
         if not self.is_enabled:
-            print('unselect, disable')
             return 
         self.is_selected = False
         self.text_colour = self.colours['normal_text']
