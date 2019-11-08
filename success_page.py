@@ -5,14 +5,14 @@
 
 '''
 from page_manager import PageBase, PageManager
-from game_page import GamePage
+import game_page
 from sprites import Hero, Princess
-from resources.resource import get_font, load_image, load_json
+from resources.resource import get_font, load_image, load_json, SETTINGS
 import pygame
 import pygame_gui
 
 
-class FailPage(PageBase):
+class SuccessPage(PageBase):
     size = (808, 700)
     # title
     title_y_off = 100
@@ -29,7 +29,7 @@ class FailPage(PageBase):
         self.__level_name = level_name
         # next_level: (map_json, toolbox_json)
         self.__next_level = self.__get_next_level(level_name)
-        self.__background = load_image('background/colored_talltrees.png')
+        self.__background = load_image(SETTINGS['background'])
         self.__init_title()
         self.__init_btn()
 
@@ -41,7 +41,7 @@ class FailPage(PageBase):
                 break
         i += 1
         if i < len(level_info):
-            return level_info[i]['map'], level_info[i]['toolbox']
+            return level_info[i]['map'], level_info[i]['name']
         return None
 
     def __init_btn(self):
@@ -57,7 +57,7 @@ class FailPage(PageBase):
         self.register_gui_event_handler(
             'ui_button_pressed', next_level_btn,
             lambda e: self.page_manager.replace(
-                GamePage(self.page_manager, *self.__next_level)
+                game_page.GamePage(self.page_manager, *self.__next_level)
             )
         )
         quit_btn = pygame_gui.elements.UIButton(
@@ -79,7 +79,7 @@ class FailPage(PageBase):
                             self.title_y_off)
 
     def draw(self, window_surface):
-        window_surface.blit(self.__background, (0, -200))
+        window_surface.blit(self.__background, (0, 0))
         window_surface.blit(self.__title_text, self.__title_pos)
 
 

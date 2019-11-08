@@ -7,7 +7,7 @@
     64,
     64
   ],
-  "background": "background/colored_forest_croped.png",
+  "background": "background/colored_talltrees.png",
   "map": [
     "............",
     "............",
@@ -48,16 +48,16 @@
     {
       "name": "dragon",
       "position": [
-        5,
-        1
+        0,
+        3
       ],
       "json": "sprites/zombie/character.json"
     },
     {
       "name": "princess",
       "position": [
-        0,
-        3
+        11,
+        6
       ],
       "json": "sprites/princess/character.json"
     }
@@ -85,7 +85,7 @@
       "name": "left",
       "object_id": "left_toolbox",
       "texture": "tools/left.png",
-      "number": 0
+      "number": 1
     }
   ],
   "tools_on_map": [

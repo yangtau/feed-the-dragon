@@ -9,7 +9,7 @@ import pygame
 from backgroud_info_page import BackgroundInfoPage
 from page_manager import PageManager, PageBase
 from map_editor_page import EditorPage
-from resources.resource import load_json, load_image, get_font
+from resources.resource import load_json, load_image, get_font, SETTINGS
 
 
 class StartPage(PageBase):
@@ -28,7 +28,7 @@ class StartPage(PageBase):
     def __init__(self, pm: PageManager):
         super().__init__(pm)
         # background
-        self.__background = load_image("background/colored_forest_croped.png")
+        self.__background = load_image(SETTINGS['background'])
         # init button
         self.__init_btn()
         self.__init_title()

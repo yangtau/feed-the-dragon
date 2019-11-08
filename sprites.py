@@ -80,6 +80,27 @@ class Idle(Action):
         pass
 
 
+class Cheer(Idle):
+    number = 50
+    @property
+    def pose(self):
+        return 'cheer'
+
+    @property
+    def arrived(self):
+        return False
+
+    def __init__(self, action_event=None):
+        super().__init__()
+        self.__acc = 0
+        self.__event = action_event
+
+    def update(self):
+        self.__acc += 1
+        if self.__acc == self.number and self.__event is not None:
+            self.__event()
+
+
 class Attack(Idle):
     @property
     def pose(self):
@@ -89,7 +110,7 @@ class Attack(Idle):
 class Walk(Action):
     @property
     def speed(self):
-        return 2
+        return 4
 
     @property
     def pose(self):
@@ -101,19 +122,28 @@ class Walk(Action):
 
 
 class FallDown(Walk):
+    def __init__(self, des_pos, action_done_event: callable = None):
+        super().__init__(des_pos)
+        self.__event = action_done_event
+
     @property
     def speed(self):
-        return 9
+        return 10
 
     @property
     def pose(self):
         return 'fallDown'
 
+    def update(self):
+        super().update()
+        if self.arrived and self.__event is not None:
+            self.__event()
+
 
 class Fly(Walk):
     @property
     def speed(self):
-        return 8
+        return 10
 
     @property
     def pose(self):
@@ -238,7 +268,7 @@ class Jump(Action):
 
 
 class Sprite(pygame.sprite.Sprite):
-    frame_num_increment = 0.25
+    frame_num_increment = 0.2
 
     def __init__(self, position: (int, int), config: str, default_action: Action = Idle()):
         pygame.sprite.Sprite.__init__(self)
@@ -293,7 +323,6 @@ class Sprite(pygame.sprite.Sprite):
         return self.__frames[pose][int(self.__frame_num)]
 
     def __load_frame(self, name: str):
-        print('__load_frame:', name)
         if name.endswith('!'):
             if len(self.__frames[name[:-1]]) == 0:
                 self.__load_frame(name[:-1])
@@ -338,7 +367,7 @@ class Dragon(Sprite):
 
 
 class Princess(Sprite):
-    frame_num_increment = 0.1
+    frame_num_increment = 0.2
 
     def __init__(self, position: (int, int), config: str):
         super().__init__(position, config, Idle())

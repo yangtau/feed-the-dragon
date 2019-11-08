@@ -5,11 +5,11 @@
 
 '''
 from page_manager import PageBase, PageManager
-from game_page import GamePage
 from sprites import Hero, Princess
-from resources.resource import get_font, load_image, load_json
+from resources.resource import get_font, load_image, load_json, SETTINGS
 import pygame
 import pygame_gui
+import game_page
 
 
 class FailPage(PageBase):
@@ -27,7 +27,7 @@ class FailPage(PageBase):
     def __init__(self, pm: PageManager, level_name: str):
         super().__init__(pm)
         self.__level_name = level_name
-        self.__background = load_image('background/colored_talltrees.png')
+        self.__background = load_image(SETTINGS['background'])
         self.__level_name = level_name
         self.__init_title()
         self.__init_btn()
@@ -37,7 +37,7 @@ class FailPage(PageBase):
         for level in level_info:
             if level['name'] == self.__level_name:
                 self.page_manager.replace(
-                    GamePage(self.page_manager, level['map'], level['toolbox']))
+                    game_page.GamePage(self.page_manager, level['map'], self.__level_name))
                 break
 
     def __init_btn(self):
@@ -69,7 +69,7 @@ class FailPage(PageBase):
                             self.title_y_off)
 
     def draw(self, window_surface):
-        window_surface.blit(self.__background, (0, -200))
+        window_surface.blit(self.__background, (0, 0))
         window_surface.blit(self.__title_text, self.__title_pos)
 
 

@@ -6,9 +6,9 @@
 '''
 import pygame_gui
 import pygame
-from resources.resource import load_image, load_json, get_font
-from game_page import GamePage
+from resources.resource import load_image, load_json, get_font, SETTINGS
 from page_manager import PageManager, PageBase
+import game_page
 
 
 class LevelPage(PageBase):
@@ -27,7 +27,7 @@ class LevelPage(PageBase):
 
     def __init__(self, pm):
         super().__init__(pm)
-        self.__background = load_image("background/colored_forest_croped.png")
+        self.__background = load_image(SETTINGS['background'])
         self.__level_info = load_json('config/level.json')
         self.__init_level_list()
         self.__init_title()
@@ -50,9 +50,10 @@ class LevelPage(PageBase):
 
     def __list_event_handle(self, event):
         level_name = event.text
-        self.page_manager.replace(GamePage(
+        self.page_manager.replace(game_page.GamePage(
             self.page_manager,
-            self.__level_info[level_name]['map']
+            self.__level_info[level_name]['map'],
+            level_name
         ))
 
     def draw(self, window_surface):

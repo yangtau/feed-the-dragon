@@ -8,7 +8,7 @@ from page_manager import PageBase, PageManager
 from level_page import LevelPage
 import pygame_gui
 import pygame
-from resources.resource import FONTS_DIR, load_image
+from resources.resource import FONTS_DIR, load_image, SETTINGS
 
 
 class BackgroundInfoPage(PageBase):
@@ -20,7 +20,7 @@ class BackgroundInfoPage(PageBase):
 
     def __init__(self, pm: PageManager):
         super().__init__(pm)
-        self.__background = load_image('background/colored_talltrees.png')
+        self.__background = load_image(SETTINGS['background'])
         self.__init_text()
         btn = pygame_gui.elements.UIButton(
             pygame.Rect(self.btn_pos, self.btn_size),
@@ -59,7 +59,7 @@ class BackgroundInfoPage(PageBase):
         self.__text.set_active_effect('typing_appear')
 
     def draw(self, window_surface):
-        window_surface.blit(self.__background, (0, -100))
+        window_surface.blit(self.__background, (0, 0))
 
 
 if __name__ == '__main__':

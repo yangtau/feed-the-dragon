@@ -10,8 +10,10 @@ from collections import defaultdict
 from game_map import MapSurface, Tool
 from page_manager import PageBase, PageManager
 from resources.resource import load_json, load_image
-from sprites import Hero, Princess, Dragon, Sprite, Fall, Jump, Walk, Fly, FallDown
+from sprites import Hero, Princess, Dragon, Sprite, Fall, Jump, Walk, Fly, FallDown, Cheer
 from game_control import Contoller
+import success_page
+import fail_page
 
 
 class Switch(object):
@@ -39,7 +41,7 @@ class Switch(object):
 
 class Role(object):
     name_to_cls = {'hero': Hero, 'princess': Princess, 'dragon': Dragon}
-    action_cls = {'fall': Fall, 'jump': Jump,
+    action_cls = {'fall': Fall, 'jump': Jump, 'cheer': Cheer,
                   'fly': Fly, 'walk': Walk, 'fall_down': FallDown}
 
     def __init__(self, conf: dict, off_map, tile_size=(64, 64)):
@@ -71,11 +73,16 @@ class Role(object):
     def clear_actions(self):
         self.__sprite.clear_actions()
 
-    def add_action(self, active_name: str, des_idx_pos=None):
+    def add_action(self, active_name: str, des_idx_pos=None, action_event=None):
         if active_name == 'fall_down':
-            x, y = self.__sprite.position
-            des_pos = x, y+600
-            self.__sprite.add_action(FallDown(des_pos))
+            if des_idx_pos is None:
+                x, y = self.__sprite.position
+                des_pos = x, y+600
+            else:
+                des_pos = self.__idx_to_pos(des_idx_pos)
+            self.__sprite.add_action(FallDown(des_pos, action_event))
+        elif active_name == 'cheer':
+            self.__sprite.add_action(Cheer(action_event))
         else:
             self.__sprite.add_action(self.action_cls[active_name](
                 self.__idx_to_pos(des_idx_pos)))
@@ -95,7 +102,7 @@ class GamePage(PageBase):
     # switch
     switch_center_pos = (756, 648)
 
-    def __init__(self, pm, map_config_file: str):
+    def __init__(self, pm, map_config_file: str, level_name=None):
         super().__init__(pm)
         map_config = load_json(map_config_file)
         # map
@@ -119,7 +126,12 @@ class GamePage(PageBase):
         self.register_event_handler(
             pygame.MOUSEBUTTONDOWN, self.__tool_drag_handler)
         # controller
-        self.__controller = Contoller(self.__map_surf, self.__roles)
+        self.__controller = Contoller(
+            self.__map_surf, self.__roles,
+            lambda: self.page_manager.replace(
+                success_page.SuccessPage(self.page_manager, level_name)),
+            lambda: self.page_manager.replace(
+                fail_page.FailPage(self.page_manager, level_name)))
 
     def __init_roles(self, roles_config):
         '''
@@ -146,8 +158,7 @@ class GamePage(PageBase):
         for pos, conf in zip(tool_poss, toolbox_config):
             tool_btn = pygame_gui.elements.UIButton(
                 pygame.Rect(pos, self.tool_size), '', self.gui_manager,
-                object_id=conf['object_id']
-            )
+                object_id=conf['object_id'])
             self.__tools[conf['name']] = Tool(conf, tool_btn)
             self.register_gui_event_handler(
                 'ui_button_pressed', tool_btn,
@@ -194,7 +205,7 @@ class GamePage(PageBase):
             state = self.__controller.state
             if state == 'inactive':
                 self.__controller.start()
-            elif state == 'active':
+            else:
                 self.__controller.reset_state()
 
     def draw(self, win_surf):
@@ -217,5 +228,5 @@ class GamePage(PageBase):
 
 if __name__ == '__main__':
     pm = PageManager((808, 700), 'hello')
-    pm.push(GamePage(pm, 'config/map_1.json'))
+    pm.push(GamePage(pm, 'config/map_2.json'))
     pm.run()

@@ -19,7 +19,7 @@ class Tile(object):
     def __init__(self, attr: dict):
         # Note: only if the name field in config file is `blank`,
         #       the tile is not a block.
-        self.__is_block = attr['name'] != 'blank'
+        self.__is_block = (attr['name'] != 'blank')
         if self.__is_block:
             self.__texture = load_image(attr['texture'])
         else:
@@ -112,8 +112,8 @@ class MapSurface(object):
         # tiles
         w, h = tuple(config['tile_size'])
         self.__tile_size = (w, h)
-        tiles = config['tiles']
-        for k, v in tiles.items():
+        tiles = dict()
+        for k, v in config['tiles'].items():
             tiles[k] = Tile(v)
         # map
         for row in config['map']:

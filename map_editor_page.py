@@ -8,7 +8,7 @@ import pygame
 import pygame_gui
 from page_manager import PageBase, PageManager
 import map_editor
-from resources.resource import load_image, get_font, save_json
+from resources.resource import load_image, get_font, save_json, SETTINGS
 
 
 class EditorPage(PageBase):
@@ -20,7 +20,7 @@ class EditorPage(PageBase):
         self.__map = map_editor.MapBase(self.map_config_file, (20, 20))
         self.__elembox = map_editor.ElemBase(
             self.toolbox_config_file, (20, 616))
-        self.__background = load_image('background/colored_forest_croped.png')
+        self.__background = load_image(SETTINGS['background'])
         self.tool_in_mouse = None
         self.register_event_handler(pygame.MOUSEBUTTONDOWN, self.drag_handler)
         self.__init_btn()
@@ -82,7 +82,7 @@ class MapNamePage(PageBase):
 
     def __init__(self, pm, elem, characters):
         super().__init__(pm)
-        self.__background = load_image("background/colored_forest_croped.png")
+        self.__background = load_image(SETTINGS['background'])
         self.elem_map = elem
         self.hero_pos = characters[0]
         self.dragon_pos = characters[1]

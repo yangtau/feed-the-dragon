@@ -1,6 +1,6 @@
 '''
 @author: yangtau
-@email: yanggtau@gmail.com
+@email: yanggtau+fd@gmail.com
 @brief:
     The controller of the game
 TODO:
@@ -15,12 +15,11 @@ from game_map import MapSurface
 
 
 class Contoller(object):
-    def __init__(self, map_surf: MapSurface, roles: dict):
+    def __init__(self, map_surf: MapSurface, roles: dict,
+                 success_handler, fail_handler):
         # state
         # 0: inactive (not start)
         # 1: active (not end)
-        # 1: succeed
-        # 2: fail
         self.__state = 0
         self.__is_block = map_surf.is_block
         self.__get_tool_name = map_surf.get_tool_name
@@ -29,6 +28,9 @@ class Contoller(object):
         self.__princess = roles['princess']
         self.__dragon = roles['dragon']
         self.__map_size = map_surf.map_size
+        # fail and success handler
+        self.__success_handler = success_handler
+        self.__fail_handler = fail_handler
 
     @property
     def state(self):
@@ -37,10 +39,8 @@ class Contoller(object):
             return 'inactive'
         if self.__state == 1:
             return 'active'
-        elif self.__state == 2:
-            return 'succeed'
         else:
-            return 'fail'
+            return 'end'
 
     def reset_state(self):
         self.__state = 0
@@ -50,11 +50,16 @@ class Contoller(object):
         if self.__state == 1:
             if self.__hero.collide(self.__dragon):
                 self.__state = 2
-                print('succeed')
                 self.__hero.clear_actions()
-                self.__hero.add_action('fall_down')
+                self.__hero.add_action(
+                    'fall_down', action_event=self.__success_handler)
             if self.__hero.collide(self.__princess):
-                print('fail')
+                self.__state = 2
+                self.__hero.clear_actions()
+                self.__hero.add_action(
+                    'cheer', action_event=self.__fail_handler)
+                self.__princess.add_action(
+                    'cheer', action_event=self.__fail_handler)
 
     def __state_trans(self, state, visited):
         res = []
@@ -100,115 +105,94 @@ class Contoller(object):
                 res = front
                 break
             tra = self.__state_trans(front[1], visited)
-            # print(tra)
             for f, pos in tra:
                 que.put((f, pos, front))
                 visited.add(pos)
         else:
             raise Exception('No solution found. The map is not a valid one.')
         actions = []
-
-        def decode_res(res):
-            f, p, pre = res
-            if pre:
-                decode_res(pre)
+        pre = res
+        while pre is not None:
+            f, p, pre = pre
             actions.append((f, p))
-        decode_res(res)
+        actions.reverse()
         return actions
 
-    def start(self):
-        actions = self.find_the_way()
-        print(actions)
-
-        def get_tool_name(x, y):
-            return self.__get_tool_name((x, y))
-
-        def fn(position, direction):
-            res = [(position, direction)]
-            while True:
-                # TODO: infinite loop
-                dire = ''
-                idx_x, idx_y = res[-1][0]
-                last = False
-                # down
-                if get_tool_name(idx_x, idx_y-1) == 'down':
-                    dire = 'down'
-                # up
-                elif get_tool_name(idx_x, idx_y+1) == 'up':
-                    dire = 'up'
-                # right
-                elif get_tool_name(idx_x-1, idx_y) == 'right':
-                    dire = 'right'
-                # left
-                elif get_tool_name(idx_x+1, idx_y) == 'left':
-                    dire = 'left'
-                else:
-                    dire = res[-1][1]
-                    last = True
-
-                if dire == 'left':
-                    idx_x -= 1
-                elif dire == 'right':
-                    idx_x += 1
-                elif dire == 'up':
-                    idx_y -= 1
-                elif dire == 'down':
-                    idx_y += 1
-                if self.__is_block((idx_x, idx_y)):
-                    break
-                if last:
-                    res[-1] = ((idx_x, idx_y), dire)
-                else:
-                    res.append(((idx_x, idx_y), dire))
-            # print(res)
-            return res
-
+    def add_flights(self, actions):
+        def get_direction(position):
+            #   0
+            #  2 3
+            #   1
+            x, y = position
+            directions = [self.__get_tool_name(pos) for pos in
+                          [(x, y-1), (x, y+1), (x-1, y), (x+1, y)]]
+            dire = None
+            if directions[0] == 'down' and directions[1] != 'up':
+                dire = 'down'
+            elif directions[0] != 'down' and directions[1] == 'up':
+                dire = 'up'
+            elif directions[2] == 'right' and directions[3] != 'left':
+                dire = 'right'
+            elif directions[2] != 'right' and directions[3] == 'left':
+                dire = 'left'
+            return dire
         # detect tools in the way
         for i in range(len(actions)):
             f, (idx_x, idx_y) = actions[i]
             # flatter the path of jump and fall
             paths = []
             if f == 'jump':
-                assert i > 0
                 _, (px, py) = actions[i-1]
                 paths.extend(zip(itertools.repeat(px),
                                  range(py, idx_y-1, -1)))
                 paths.append((idx_x, idx_y))
             elif f == 'fall':
-                assert i > 0
                 _, (_, py) = actions[i-1]
                 paths.extend(zip(itertools.repeat(idx_x),
                                  range(py, idx_y+1, 1)))
             else:
                 paths.append((idx_x, idx_y))
-            # print(f, paths)
             for x, y in paths:
-                dire = ''
-                # down
-                if get_tool_name(x, y-1) == 'down':
-                    dire = 'down'
-                # up
-                if get_tool_name(x, y+1) == 'up':
-                    dire = 'up'
-                # right
-                if get_tool_name(x-1, y) == 'right':
-                    dire = 'right'
-                # left
-                if get_tool_name(x+1, y) == 'left':
-                    dire = 'left'
-                if dire == '':
+                dire = get_direction((x, y))
+                if dire is None:
                     continue
-                flights = fn((x, y), dire)
+                flights = [((x, y), dire)]
+                while True:
+                    (idx_x, idx_y) = flights[-1][0]
+                    dire = get_direction((idx_x, idx_y))
+                    last = False
+                    if dire is None:
+                        dire = flights[-1][1]
+                        last = True
+                    if dire == 'left':
+                        idx_x -= 1
+                    elif dire == 'right':
+                        idx_x += 1
+                    elif dire == 'up':
+                        idx_y -= 1
+                    elif dire == 'down':
+                        idx_y += 1
+                    if self.__is_block((idx_x, idx_y)):
+                        break
+                    if last:
+                        flights[-1] = ((idx_x, idx_y), dire)
+                    else:
+                        flights.append(((idx_x, idx_y), dire))
                 actions[i] = (f, (x, y))
                 actions = actions[:i+1] + [('fly', pos) for pos, _ in flights]
-                break
-            else:
-                continue
-            break
-        print(actions)
+                actions.append(('fall_down', (idx_x, 10)))
+                return actions
+        return actions
+
+    def start(self):
+        actions = self.find_the_way()
+        actions = self.add_flights(actions)
         actions.append((None, None))
         for i in range(1, len(actions)):
             f, p = actions[i-1]
+            if f == 'fall_down':
+                self.__hero.add_action(f, p, self.__fail_handler)
+                continue
             if f == 'walk' and actions[i][0] != 'walk':
                 self.__hero.add_action(f, p)
             if f != 'walk' and f is not None:
