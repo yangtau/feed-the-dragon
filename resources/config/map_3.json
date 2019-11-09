@@ -68,14 +68,24 @@
       "object_id": "up_toolbox",
       "texture": "tools/up.png",
       "number": 1,
-      "position": []
+      "position": [
+        [
+          1,
+          0
+        ]
+      ]
     },
     {
       "name": "down",
       "object_id": "down_toolbox",
       "texture": "tools/down.png",
       "number": 0,
-      "position": []
+      "position": [
+        [
+          4,
+          5
+        ]
+      ]
     },
     {
       "name": "right",

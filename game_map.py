@@ -99,6 +99,11 @@ class MapSurface(object):
             for j, tool in enumerate(row):
                 if tool is not None:
                     self.__surface.blit(tool.texture, (j*w, i*h))
+        # fixed tools
+        for i, row in enumerate(self.__fixed_tools):
+            for j, tool in enumerate(row):
+                if tool is not None:
+                    self.__surface.blit(tool.texture, (j*w, i*h))
 
     def __update_tool(self, idx_pos):
         '''Append a new tool on the original surface'''
@@ -123,6 +128,8 @@ class MapSurface(object):
         self.__surf_size = row*w, col*h
         # tools on map
         self.__tool_on_map = [[None for _ in range(row)] for _ in range(col)]
+        # fixed tools
+        self.__fixed_tools = [[None for _ in range(row)] for _ in range(col)]
 
     def is_block(self, idx_pos: (int, int)) -> bool:
         '''Return true if there is a block or a tool, or the position 
@@ -138,10 +145,12 @@ class MapSurface(object):
     def get_tool_name(self, idx_pos: (int, int)):
         x, y = idx_pos
         xl, yl = self.__map_size
-        if x < 0 or y < 0 or x >= xl or y >= yl or\
-                self.__tool_on_map[y][x] is None:
+        if x < 0 or y < 0 or x >= xl or y >= yl:
             return None
-        return self.__tool_on_map[y][x].name
+        tool = self.__tool_on_map[y][x]
+        if tool is None:
+            tool = self.__fixed_tools[y][x]
+        return tool.name if tool else None
 
     @property
     def map_size(self):
@@ -151,13 +160,22 @@ class MapSurface(object):
         w, h = self.__tile_size
         return pos[0]//w, pos[1]//h
 
+    def add_fixed_tools(self, tools):
+        '''
+        :param tools: [(tool, pos)]
+        '''
+        for tool, (x, y) in tools:
+            self.__fixed_tools[y][x] = tool
+        self.__redraw()
+
     def put_tool(self, tool, position: (int, int)) -> bool:
         '''Return true if the tool is put successfully
         :param tool: Tool
         :param position: The relative position with respect to map.
         '''
         idx_x, idx_y = self.position_to_index(position)
-        if self.__tool_on_map[idx_y][idx_x] is not None:
+        if self.__tool_on_map[idx_y][idx_x] is not None \
+                or self.__fixed_tools[idx_y][idx_x] is not None:
             return False  # there is already a tool in the position
         self.__tool_on_map[idx_y][idx_x] = tool
         self.__update_tool((idx_x, idx_y))
@@ -166,11 +184,10 @@ class MapSurface(object):
     def remove_tool(self, position: (int, int)) -> Tool:
         '''Return the tool int the position and remove it from the map'''
         idx_x, idx_y = self.position_to_index(position)
-        if self.__tool_on_map[idx_y][idx_x] is None:
-            return None
         tool = self.__tool_on_map[idx_y][idx_x]
         self.__tool_on_map[idx_y][idx_x] = None
-        self.__redraw()
+        if tool is not None:
+            self.__redraw()
         return tool
 
     @property

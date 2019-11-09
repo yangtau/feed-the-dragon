@@ -155,14 +155,24 @@ class GamePage(PageBase):
         self.__tools = dict()
         tool_poss = [(i*(self.tool_size[0]+self.tool_margin)+self.tool_pos[0],
                       self.tool_pos[1]) for i in range(len(toolbox_config))]
+        fixed_tools = []
         for pos, conf in zip(tool_poss, toolbox_config):
+            # btn
             tool_btn = pygame_gui.elements.UIButton(
                 pygame.Rect(pos, self.tool_size), '', self.gui_manager,
                 object_id=conf['object_id'])
-            self.__tools[conf['name']] = Tool(conf, tool_btn)
             self.register_gui_event_handler(
                 'ui_button_pressed', tool_btn,
                 self.__get_tool_click_handler(conf['name']))
+            # tool
+            tool = Tool(conf, tool_btn)
+            self.__tools[conf['name']] = tool
+            # fixed position
+            for pos in conf['position']:
+                pos = tuple(pos)
+                fixed_tools.append((tool, pos))
+        # add fixed tools to map
+        self.__map_surf.add_fixed_tools(fixed_tools)
 
     def __get_tool_click_handler(self, name) -> callable:
         '''Return a gui event handler'''
@@ -228,5 +238,5 @@ class GamePage(PageBase):
 
 if __name__ == '__main__':
     pm = PageManager((808, 700), 'hello')
-    pm.push(GamePage(pm, 'config/map_2.json'))
+    pm.push(GamePage(pm, 'config/map_3.json'))
     pm.run()
