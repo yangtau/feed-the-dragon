@@ -67,30 +67,28 @@
       "name": "up",
       "object_id": "up_toolbox",
       "texture": "tools/up.png",
-      "number": 1
+      "number": 1,
+      "position": []
     },
     {
       "name": "down",
       "object_id": "down_toolbox",
       "texture": "tools/down.png",
-      "number": 0
+      "number": 0,
+      "position": []
     },
     {
       "name": "right",
       "object_id": "right_toolbox",
       "texture": "tools/right.png",
-      "number": 0
+      "number": 0,
+      "position": []
     },
     {
       "name": "left",
       "object_id": "left_toolbox",
       "texture": "tools/left.png",
-      "number": 1
-    }
-  ],
-  "tools_on_map": [
-    {
-      "name": "right",
+      "number": 1,
       "position": []
     }
   ]
