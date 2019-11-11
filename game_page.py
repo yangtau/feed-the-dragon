@@ -4,6 +4,7 @@
 @brief:
     the page where players play the game
 '''
+import sys
 import pygame
 import pygame_gui
 from collections import defaultdict
@@ -237,6 +238,10 @@ class GamePage(PageBase):
 
 
 if __name__ == '__main__':
+    if len(sys.argv) == 2:
+        map_file = sys.argv[1]
+    else:
+        map_file = 'config/map_1.json'
     pm = PageManager((808, 700), 'hello')
-    pm.push(GamePage(pm, 'config/map_3.json'))
+    pm.push(GamePage(pm, map_file))
     pm.run()
