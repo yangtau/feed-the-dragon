@@ -18,5 +18,10 @@
   {
     "name": "第四关",
     "map": "config/map_5.json"
+  },
+  {
+    "name": "第五关",
+    "map": "config/map_6.json"
   }
+
 ]
