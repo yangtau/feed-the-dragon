@@ -107,7 +107,7 @@ class GamePage(PageBase):
     tool_margin = 10
     tool_size = (64, 64)
     # switch
-    switch_center_pos = (756, 648)
+    switch_center_pos = (common.WIN_SIZE[0]-32, tool_pos[1]+42)
 
     def __init__(self, pm, map_config_file: str, level_name=None):
         super().__init__(pm)
