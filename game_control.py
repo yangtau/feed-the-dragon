@@ -48,16 +48,16 @@ class Contoller(object):
 
     def state_check(self):
         if self.__state == 1:
-            if self.__hero.collide(self.__dragon):
-                self.__state = 2
-                self.__hero.clear_actions()
-                self.__hero.add_action(
-                    'fall_down', action_event=self.__success_handler)
-            elif self.__is_block(self.__hero.idx_position()):
+            if self.__is_block(self.__hero.idx_position()):
                 self.__state = 2
                 self.__hero.clear_actions()
                 self.__hero.add_action(
                     'fall_down', action_event=self.__fail_handler)
+            elif self.__hero.collide(self.__dragon):
+                self.__state = 2
+                self.__hero.clear_actions()
+                self.__hero.add_action(
+                    'fall_down', action_event=self.__success_handler)
             elif self.__hero.collide(self.__princess):
                 self.__state = 2
                 self.__hero.clear_actions()
@@ -191,10 +191,10 @@ class Contoller(object):
         return actions
 
     def start(self):
-        actions = self.find_the_way()
-        if actions is None:
-            x, y = self.__hero.init_pos
-            actions = [('walk', (x, y)) for x in range(x, 14)]
+       # actions = self.find_the_way()
+       # if actions is None:
+        x, y = self.__hero.init_pos
+        actions = [('walk', (x, y)) for x in range(x, 14)]
         actions = self.add_flights(actions)
         actions.append((None, None))
         for i in range(1, len(actions)):
