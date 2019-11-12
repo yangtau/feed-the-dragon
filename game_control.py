@@ -53,7 +53,12 @@ class Contoller(object):
                 self.__hero.clear_actions()
                 self.__hero.add_action(
                     'fall_down', action_event=self.__success_handler)
-            if self.__hero.collide(self.__princess):
+            elif self.__is_block(self.__hero.idx_position()):
+                self.__state = 2
+                self.__hero.clear_actions()
+                self.__hero.add_action(
+                    'fall_down', action_event=self.__fail_handler)
+            elif self.__hero.collide(self.__princess):
                 self.__state = 2
                 self.__hero.clear_actions()
                 self.__hero.add_action(
@@ -109,7 +114,8 @@ class Contoller(object):
                 que.put((f, pos, front))
                 visited.add(pos)
         else:
-            raise Exception('No solution found. The map is not a valid one.')
+            # raise Exception('No solution found. The map is not a valid one.')
+            return None
         actions = []
         pre = res
         while pre is not None:
@@ -186,6 +192,9 @@ class Contoller(object):
 
     def start(self):
         actions = self.find_the_way()
+        if actions is None:
+            x, y = self.__hero.init_pos
+            actions = [('walk', (x, y)) for x in range(x, 14)]
         actions = self.add_flights(actions)
         actions.append((None, None))
         for i in range(1, len(actions)):

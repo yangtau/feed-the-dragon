@@ -9,15 +9,15 @@
   ],
   "background": "background/colored_talltrees.png",
   "map": [
-    "wwwwww.wwwwww.",
-    "w.w...........",
-    "w.w.ww.wwww.w.",
-    "w.w.ww.wwww.w.",
-    "w...........w.",
-    "w.wwwwwwwww.w.",
-    "ww..........w.",
-    "....wwwwwww...",
-    "^^^b^^^^^^^^^^"
+    ".w.www.wwwww.w",
+    ".............w",
+    ".w.wwwbwwwww.w",
+    ".w.....wwwww.w",
+    ".w.www.wwwww.w",
+    ".w.....w.....w",
+    "ww.www.wwwww.w",
+    "..............",
+    "^^b^^^^^^^^^b^"
   ],
   "tiles": {
     "^": {
@@ -52,7 +52,7 @@
     {
       "name": "dragon",
       "position": [
-        1,
+        0,
         5
       ],
       "json": "sprites/zombie/character.json"
@@ -85,15 +85,25 @@
       "name": "right",
       "object_id": "right_toolbox",
       "texture": "tools/right.png",
-      "number": 2,
-      "position": []
+      "number": 1,
+      "position": [
+        [
+          1,
+          3
+        ]
+      ]
     },
     {
       "name": "left",
       "object_id": "left_toolbox",
       "texture": "tools/left.png",
-      "number": 2,
-      "position": []
+      "number": 1,
+      "position": [
+        [
+          13,
+          1
+        ]
+      ]
     }
   ]
 }

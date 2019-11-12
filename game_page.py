@@ -57,6 +57,11 @@ class Role(object):
         return (pos[0]*self.__tile_size[0]+self.__off_map[0],
                 pos[1]*self.__tile_size[1]+self.__off_map[1])
 
+    def idx_position(self):
+        x, y = self.__sprite.position
+        x, y = x-self.__off_map[0], y-self.__off_map[1]
+        return (x//self.__tile_size[0], y//self.__tile_size[1])
+
     @property
     def init_pos(self):
         return self.__init_pos
