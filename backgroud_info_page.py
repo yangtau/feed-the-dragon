@@ -9,10 +9,11 @@ from level_page import LevelPage
 import pygame_gui
 import pygame
 from resources.resource import FONTS_DIR, load_image, SETTINGS
+import common
 
 
 class BackgroundInfoPage(PageBase):
-    size = (808, 700)
+    size = common.WIN_SIZE
     text_size = (700, 500)
     text_pos = ((size[0]-text_size[0])//2, 50)
     btn_size = (160, 60)
@@ -63,6 +64,6 @@ class BackgroundInfoPage(PageBase):
 
 
 if __name__ == '__main__':
-    pm = PageManager((808, 700), 'hello')
+    pm = PageManager(common.WIN_SIZE, 'hello')
     pm.push(BackgroundInfoPage(pm))
     pm.run()

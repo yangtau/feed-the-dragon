@@ -166,7 +166,7 @@ class Fall(Action):
                3 idle
     '''
     g = 0.4  # gravitational acceleration
-    speed = 2  # speed of linearly moving
+    speed = 3  # speed of linearly moving
 
     def __init__(self, to_pos: (int, int)):
         super().__init__(to_pos)
@@ -220,7 +220,7 @@ class Jump(Action):
                4 idle
     '''
     g = 0.4  # gravitational acceleration
-    speed = 2  # speed of linearly moving
+    speed = 3  # speed of linearly moving
 
     def __init__(self, to_pos: (int, int)):
         super().__init__(to_pos)

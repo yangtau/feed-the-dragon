@@ -15,6 +15,7 @@ from sprites import Hero, Princess, Dragon, Sprite, Fall, Jump, Walk, Fly, FallD
 from game_control import Contoller
 import success_page
 import fail_page
+import common
 
 
 class Switch(object):
@@ -94,7 +95,7 @@ class Role(object):
 
 class GamePage(PageBase):
     # map
-    map_pos = (20, 10)
+    map_pos = (0, 0)
     tile_size = (64, 64)
     # toolbox
     tool_pos = (20, 606)
@@ -242,6 +243,6 @@ if __name__ == '__main__':
         map_file = sys.argv[1]
     else:
         map_file = 'config/map_1.json'
-    pm = PageManager((808, 700), 'hello')
+    pm = PageManager(common.WIN_SIZE, 'hello')
     pm.push(GamePage(pm, map_file))
     pm.run()

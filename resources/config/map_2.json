@@ -16,13 +16,17 @@
     "wwwww.......",
     "............",
     "............",
-    "^^^^^^^^^^^^",
+    "^^^^^b^^^^^^",
     "$$$$$$$$$$$$"
   ],
   "tiles": {
     "^": {
       "name": "grass",
       "texture": "tiles/grassMid.png"
+    },
+    "b": {
+      "name": "box",
+      "texture": "tiles/box.png"
     },
     ".": {
       "name": "blank"

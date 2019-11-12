@@ -10,10 +10,11 @@ from backgroud_info_page import BackgroundInfoPage
 from page_manager import PageManager, PageBase
 from map_editor_page import EditorPage
 from resources.resource import load_json, load_image, get_font, SETTINGS
+import common
 
 
 class StartPage(PageBase):
-    size = (808, 700)
+    size = common.WIN_SIZE
     # button size and pos
     btn_size = (160, 60)
     btn_margin = 30

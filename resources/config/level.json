@@ -4,7 +4,19 @@
     "map": "config/map_1.json"
   },
   {
-    "name": "第二关",
+    "name": "第一关",
     "map": "config/map_2.json"
+  },
+  {
+    "name": "第二关",
+    "map": "config/map_3.json"
+  },
+  {
+    "name": "第三关",
+    "map": "config/map_4.json"
+  },
+  {
+    "name": "第四关",
+    "map": "config/map_5.json"
   }
 ]

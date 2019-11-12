@@ -7,6 +7,7 @@
 from resources.resource import load_image
 import pygame
 import pygame_gui
+import common
 
 
 class Tile(object):
@@ -19,11 +20,15 @@ class Tile(object):
     def __init__(self, attr: dict):
         # Note: only if the name field in config file is `blank`,
         #       the tile is not a block.
-        self.__is_block = (attr['name'] != 'blank')
-        if self.__is_block:
+        self.__name = attr['name']
+        if self.is_block:
             self.__texture = load_image(attr['texture'])
         else:
             self.__texture = None
+
+    @property
+    def name(self):
+        return self.__name
 
     @property
     def texture(self):
@@ -31,7 +36,11 @@ class Tile(object):
 
     @property
     def is_block(self):
-        return self.__is_block
+        return self.name != 'blank'
+
+    @property
+    def putable(self):
+        return self.name == 'box' or self.name == 'blank'
 
 
 class Tool(object):
@@ -88,7 +97,7 @@ class MapSurface(object):
 
     def __redraw(self):
         w, h = self.__tile_size
-        self.__surface = pygame.Surface(self.__surf_size, pygame.SRCALPHA, 32)
+        self.__surface = pygame.Surface(common.MAP_SIZE, pygame.SRCALPHA, 32)
         # tiles
         for i, row in enumerate(self.__map):
             for j, tile in enumerate(row):
@@ -125,7 +134,6 @@ class MapSurface(object):
             self.__map.append([tiles[c] for c in row])
         row, col = len(self.__map[0]), len(self.__map)
         self.__map_size = row, col
-        self.__surf_size = row*w, col*h
         # tools on map
         self.__tool_on_map = [[None for _ in range(row)] for _ in range(col)]
         # fixed tools
@@ -174,7 +182,8 @@ class MapSurface(object):
         :param position: The relative position with respect to map.
         '''
         idx_x, idx_y = self.position_to_index(position)
-        if self.__tool_on_map[idx_y][idx_x] is not None \
+        if not self.__map[idx_y][idx_x].putable or\
+            self.__tool_on_map[idx_y][idx_x] is not None \
                 or self.__fixed_tools[idx_y][idx_x] is not None:
             return False  # there is already a tool in the position
         self.__tool_on_map[idx_y][idx_x] = tool

@@ -1,6 +1,6 @@
 {
   "size": [
-    12,
+    14,
     9
   ],
   "tile_size": [
@@ -9,15 +9,15 @@
   ],
   "background": "background/colored_talltrees.png",
   "map": [
-    "............",
-    "............",
-    "............",
-    "............",
-    "wwwww.......",
-    "............",
-    "............",
-    "^^^^^b^^^^^^",
-    "$$$$$$$$$$$$"
+    "wwwwww........",
+    "wwwww.........",
+    "wwww....w.....",
+    "www....www....",
+    "ww....wwwww...",
+    "w....wwwwwww..",
+    "....wwwwwwwww.",
+    "^^b^^^^^^^^^^^",
+    "$$$$$$$$$$$$$$"
   ],
   "tiles": {
     "^": {
@@ -52,15 +52,15 @@
     {
       "name": "dragon",
       "position": [
-        5,
-        1
+        13,
+        0
       ],
       "json": "sprites/zombie/character.json"
     },
     {
       "name": "princess",
       "position": [
-        11,
+        13,
         6
       ],
       "json": "sprites/princess/character.json"
@@ -85,7 +85,7 @@
       "name": "right",
       "object_id": "right_toolbox",
       "texture": "tools/right.png",
-      "number": 0,
+      "number": 1,
       "position": []
     },
     {
