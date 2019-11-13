@@ -7,7 +7,8 @@
 import pygame
 import pygame_gui
 from collections import defaultdict
-from resources.resource import THEME_DIR
+from resources.resource import THEME_DIR, play_sound
+import common
 
 
 class PageBase(object):
@@ -66,6 +67,8 @@ class PageBase(object):
         for handler in self.__event_handlers[event.type]:
             handler(event)
         if event.type == pygame.USEREVENT:
+            if event.user_type == 'ui_button_pressed':
+                play_sound(common.CLICK_SOUND)
             handler = self.__gui_event_handlers.get(
                 (event.user_type, event.ui_element), None)
             if handler:

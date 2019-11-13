@@ -10,6 +10,7 @@ FONTS_DIR = os.path.join(RES_DIR, 'fonts/')
 THEME_DIR = os.path.join(RES_DIR, 'themes/')
 IMAGE_DIR = os.path.join(RES_DIR, 'images/')
 SPRITE_DIR = os.path.join(RES_DIR, 'sprites/')
+SOUND_DIR = os.path.join(RES_DIR, 'sound/')
 
 
 @lru_cache(maxsize=64)
@@ -55,6 +56,22 @@ def save_json(filename: str, json_obj):
     filepath = os.path.join(RES_DIR, filename)
     with open(filepath, 'w', encoding='utf-8') as f:
         json.dump(json_obj, f)
+
+
+@lru_cache(maxsize=64)
+def load_sound(filename: str):
+    return pygame.mixer.Sound(os.path.join(SOUND_DIR, filename))
+
+
+def play_sound(filename: str):
+    sound = load_sound(filename)
+    sound.play()
+
+
+def play_bgm():
+    pygame.mixer.music.load(os.path.join(SOUND_DIR, 'background.mp3'))
+    pygame.mixer.music.set_volume(0.1)
+    pygame.mixer.music.play(-1, 0)
 
 
 SETTINGS = load_json('config/setting.json')

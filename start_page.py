@@ -9,7 +9,7 @@ import pygame
 from backgroud_info_page import BackgroundInfoPage
 from page_manager import PageManager, PageBase
 from map_editor_page import EditorPage
-from resources.resource import load_json, load_image, get_font, SETTINGS
+from resources.resource import load_json, load_image, get_font, SETTINGS, play_bgm 
 import common
 
 
@@ -33,6 +33,7 @@ class StartPage(PageBase):
         # init button
         self.__init_btn()
         self.__init_title()
+        play_bgm()
 
     def __init_title(self):
         font = get_font('noto-sans-bold', self.title_text_size)

@@ -8,8 +8,8 @@ import pygame
 import math
 from queue import Queue
 from collections import defaultdict
-from resources.resource import load_sprite_image
-from resources.resource import load_json
+from resources.resource import load_sprite_image, load_json, play_sound
+import common
 
 
 class Action(object):
@@ -141,6 +141,9 @@ class FallDown(Walk):
 
 
 class Fly(Walk):
+    def __init__(self, des_pos):
+        super().__init__(des_pos)
+
     @property
     def speed(self):
         return 10
@@ -155,6 +158,9 @@ class Fly(Walk):
             return 'shove'
         else:
             return 'idle'
+
+    def update(self):
+        super().update()
 
 
 class Fall(Action):

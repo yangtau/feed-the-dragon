@@ -10,7 +10,7 @@ import pygame_gui
 from collections import defaultdict
 from game_map import MapSurface, Tool
 from page_manager import PageBase, PageManager
-from resources.resource import load_json, load_image
+from resources.resource import load_json, load_image, play_sound
 from sprites import Hero, Princess, Dragon, Sprite, Fall, Jump, Walk, Fly, FallDown, Cheer
 from game_control import Contoller
 import success_page
@@ -39,6 +39,7 @@ class Switch(object):
 
     def click(self):
         self.__state = 1-self.__state
+        play_sound(common.CLICK_SOUND)
 
 
 class Role(object):
@@ -133,12 +134,21 @@ class GamePage(PageBase):
         self.register_event_handler(
             pygame.MOUSEBUTTONDOWN, self.__tool_drag_handler)
         # controller
+        self.__level_name = level_name
         self.__controller = Contoller(
             self.__map_surf, self.__roles,
-            lambda: self.page_manager.replace(
-                success_page.SuccessPage(self.page_manager, level_name)),
-            lambda: self.page_manager.replace(
-                fail_page.FailPage(self.page_manager, level_name)))
+            self.__success_event,
+            self.__fail_event)
+
+    def __success_event(self):
+        play_sound(common.SCCUESS_SOUND)
+        self.page_manager.replace(success_page.SuccessPage(
+            self.page_manager, self.__level_name))
+
+    def __fail_event(self):
+        play_sound(common.FAIL_SUOUND)
+        self.page_manager.replace(fail_page.FailPage(
+            self.page_manager, self.__level_name))
 
     def __init_roles(self, roles_config):
         '''
@@ -204,16 +214,19 @@ class GamePage(PageBase):
                     if self.__map_surf.put_tool(self.__tool_on_mouse, rela_pos):
                         # self.__tool_on_mouse.dec_num()
                         self.__tool_on_mouse = None
+                        play_sound(common.PUT_SOUND)
                 else:
                     # remove tool
                     tool = self.__map_surf.remove_tool(rela_pos)
                     if tool is not None:
+                        play_sound(common.REMOVE_SOUND)
                         tool.inc_num()
         # click right
         if event.button == 3 and self.__tool_on_mouse is not None:
             # throw the tool on mouse
             self.__tool_on_mouse.inc_num()
             self.__tool_on_mouse = None
+            play_sound(common.REMOVE_SOUND)
 
     def __switch_click_handler(self, event):
         btn = self.__switch
