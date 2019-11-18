@@ -138,8 +138,8 @@ class ElemBase(object):
         data = load_json(config)
         self.__number = data['elem_number']
         self.__elem_size = tuple(data['elem_size'])
-        elem = data['elem']
-        for k, v in elem.items():
+        elem = dict()
+        for k, v in data['elem'].items():
             elem[k] = Elem(v)
         self.__elembox = [elem[c] for c in data['elem_name']]
 
