@@ -96,9 +96,11 @@ class PageManager(object):
         '''Replace the current top page with `page`'''
         self.__page_stack[-1] = page
 
-    def pop(self):
+    def pop(self, num=1):
         '''Exit the top page'''
-        self.__page_stack.pop()
+        for i in range(num):      
+            self.__page_stack.pop()
+            
         if len(self.__page_stack) == 0:
             # Exit when there is no page in the stack
             pygame.quit()
