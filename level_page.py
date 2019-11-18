@@ -9,10 +9,11 @@ import pygame
 from resources.resource import load_image, load_json, get_font, SETTINGS
 from page_manager import PageManager, PageBase
 import game_page
+import common
 
 
 class LevelPage(PageBase):
-    size = (808, 700)
+    size = common.WIN_SIZE
     # level list
     level_list_width = 300
     level_list_item_height = 50
@@ -62,6 +63,6 @@ class LevelPage(PageBase):
 
 
 if __name__ == '__main__':
-    pm = PageManager((808, 700), 'level page')
+    pm = PageManager(common.WIN_SIZE, 'level page')
     pm.push(LevelPage(pm))
     pm.run()

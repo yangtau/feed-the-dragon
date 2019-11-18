@@ -10,10 +10,11 @@ from sprites import Hero, Princess
 from resources.resource import get_font, load_image, load_json, SETTINGS
 import pygame
 import pygame_gui
+import common
 
 
 class SuccessPage(PageBase):
-    size = (808, 700)
+    size = common.WIN_SIZE
     # title
     title_y_off = 100
     title_str = '胜利'
@@ -84,6 +85,6 @@ class SuccessPage(PageBase):
 
 
 if __name__ == '__main__':
-    pm = PageManager((808, 700), 'Hello')
+    pm = PageManager(common.WIN_SIZE, 'Hello')
     pm.push(FailPage(pm, ''))
     pm.run()

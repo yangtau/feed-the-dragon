@@ -9,6 +9,7 @@ import pygame_gui
 from page_manager import PageBase, PageManager
 import map_editor
 from resources.resource import load_image, get_font, save_json, SETTINGS
+import common
 
 
 class EditorPage(PageBase):
@@ -26,7 +27,7 @@ class EditorPage(PageBase):
         self.__init_btn()
 
     def __init_btn(self):
-        btn_rect = pygame.Rect((700, 620), (100, 60))
+        btn_rect = pygame.Rect((750, 620), (100, 60))
         self.__input_box = pygame_gui.elements.UIButton(
             btn_rect, "完成!", self.gui_manager)
 
@@ -246,6 +247,6 @@ class MapNamePage(PageBase):
 
 
 if __name__ == '__main__':
-    pm1 = PageManager((808, 700), 'hello')
+    pm1 = PageManager(common.WIN_SIZE, 'hello')
     pm1.push(EditorPage(pm1))
     pm1.run()

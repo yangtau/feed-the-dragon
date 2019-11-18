@@ -9,15 +9,15 @@
   ],
   "background": "background/colored_talltrees.png",
   "map": [
-    "wwwwww........",
-    "wwwww.........",
-    "wwww....w.....",
-    "www....www....",
-    "ww....wwwww...",
-    "w....wwwwwww..",
-    "....wwwwwwwww.",
-    "^^b^^^^^^^^^^^",
-    "$$$$$$$$$$$$$$"
+    "wwwwww.wwwwww.",
+    "w.w...........",
+    "w.w.ww.wwww.w.",
+    "w.w.ww.wwww.w.",
+    "w...........w.",
+    "w.wwwwwwwww.w.",
+    "ww..........w.",
+    "....wwwwwww...",
+    "^^^b^^^^^^^^^^"
   ],
   "tiles": {
     "^": {
@@ -45,15 +45,15 @@
       "name": "hero",
       "position": [
         0,
-        6
+        7
       ],
       "json": "sprites/hero/character.json"
     },
     {
       "name": "dragon",
       "position": [
-        13,
-        0
+        1,
+        5
       ],
       "json": "sprites/zombie/character.json"
     },
@@ -61,7 +61,7 @@
       "name": "princess",
       "position": [
         13,
-        6
+        7
       ],
       "json": "sprites/princess/character.json"
     }
@@ -71,28 +71,28 @@
       "name": "up",
       "object_id": "up_toolbox",
       "texture": "tools/up.png",
-      "number": 6,
+      "number": 2,
       "position": []
     },
     {
       "name": "down",
       "object_id": "down_toolbox",
       "texture": "tools/down.png",
-      "number": 0,
+      "number": 2,
       "position": []
     },
     {
       "name": "right",
       "object_id": "right_toolbox",
       "texture": "tools/right.png",
-      "number": 6,
+      "number": 2,
       "position": []
     },
     {
       "name": "left",
       "object_id": "left_toolbox",
       "texture": "tools/left.png",
-      "number": 0,
+      "number": 2,
       "position": []
     }
   ]

@@ -4,6 +4,7 @@
 @brief:
     the page where players play the game
 '''
+import sys
 import pygame
 import pygame_gui
 from collections import defaultdict
@@ -14,6 +15,7 @@ from sprites import Hero, Princess, Dragon, Sprite, Fall, Jump, Walk, Fly, FallD
 from game_control import Contoller
 import success_page
 import fail_page
+import common
 
 
 class Switch(object):
@@ -55,6 +57,11 @@ class Role(object):
         return (pos[0]*self.__tile_size[0]+self.__off_map[0],
                 pos[1]*self.__tile_size[1]+self.__off_map[1])
 
+    def idx_position(self):
+        x, y = self.__sprite.position
+        x, y = x-self.__off_map[0], y-self.__off_map[1]
+        return (x//self.__tile_size[0], y//self.__tile_size[1])
+
     @property
     def init_pos(self):
         return self.__init_pos
@@ -93,14 +100,14 @@ class Role(object):
 
 class GamePage(PageBase):
     # map
-    map_pos = (20, 10)
+    map_pos = (0, 0)
     tile_size = (64, 64)
     # toolbox
     tool_pos = (20, 606)
     tool_margin = 10
     tool_size = (64, 64)
     # switch
-    switch_center_pos = (756, 648)
+    switch_center_pos = (common.WIN_SIZE[0]-32, tool_pos[1]+42)
 
     def __init__(self, pm, map_config_file: str, level_name=None):
         super().__init__(pm)
@@ -237,6 +244,10 @@ class GamePage(PageBase):
 
 
 if __name__ == '__main__':
-    pm = PageManager((808, 700), 'hello')
-    pm.push(GamePage(pm, 'config/map_3.json'))
+    if len(sys.argv) == 2:
+        map_file = sys.argv[1]
+    else:
+        map_file = 'config/map_1.json'
+    pm = PageManager(common.WIN_SIZE, 'hello')
+    pm.push(GamePage(pm, map_file))
     pm.run()
