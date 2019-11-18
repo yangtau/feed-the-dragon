@@ -74,11 +74,20 @@ class EditorPage(PageBase):
 
 class MapNamePage(PageBase):
     size = (808, 700)
+    y_off = 30
+    y_dis = 100
     # title
-    title_y_off = 30
-    title_str = '地图名称'
+    title_str = '地图设置'
     title_text_size = 50
     title_color = (120, 120, 255)
+    #map_name
+    map_name_str = '地图名称'
+    map_name_text_size = 20
+    map_name_color = (20,30,60)
+    #toolbox
+    toolbox_str = '工具数目（格式：u,d,l,r）'
+    toolbox_text_size = 20
+    toolbox_color = (50,180,120)
 
     def __init__(self, pm, elem, characters):
         super().__init__(pm)
@@ -87,35 +96,81 @@ class MapNamePage(PageBase):
         self.hero_pos = characters[0]
         self.dragon_pos = characters[1]
         self.princess_pos = characters[2]
-        self.__init_title()
+        self.__init_text()
         self.__init_input_box()
+        self.__init_btn()
 
-    def __init_title(self):
-        font = get_font('noto-sans-bold', self.title_text_size)
-        text = font.render(
+    def __init_text(self):
+        #title
+        font_title = get_font('noto-sans-bold', self.title_text_size)
+        text_title = font_title.render(
             self.title_str, True, self.title_color)
-        self.__title_text = text
-        self.__title_pos = ((self.size[0]-text.get_width())//2,
-                            self.title_y_off)
+        self.__title_text = text_title
+        self.__title_pos = ((self.size[0]-text_title.get_width())//2,
+                            self.y_off)
+        #map_name
+        font_map_name = get_font('noto-sans-bold', self.map_name_text_size)
+        text_map_name = font_map_name.render(
+                self.map_name_str, True, self.map_name_color)
+        self.__map_name_text = text_map_name
+        self.__map_name_pos = ((self.size[0]-text_map_name.get_width())//2,
+                               self.y_off+self.y_dis)
+        #toolbox
+        font_toolbox = get_font('noto-sans-bold', self.toolbox_text_size)
+        text_toolbox = font_toolbox.render(
+                self.toolbox_str, True, self.toolbox_color)
+        self.__toolbox_text = text_toolbox
+        self.__toolbox_pos = ((self.size[0]-text_toolbox.get_width())//2,
+                              self.y_off+3*self.y_dis)
 
     def __init_input_box(self):
-        textLine_rect = pygame.Rect((300, 100), (200, 60))
-        self.__input_box = pygame_gui.elements.UITextEntryLine(
-            textLine_rect, self.gui_manager)
+        #map_name
+        map_name_rect = pygame.Rect((self.__map_name_pos[0]-80, 
+                                     self.__map_name_pos[1]+2*self.map_name_text_size), 
+                                    (240, 60))
+        self.__map_box = pygame_gui.elements.UITextEntryLine(
+            map_name_rect, self.gui_manager)
         self.register_gui_event_handler(
-            'ui_text_entry_finished', self.__input_box,
-            self.__input_complete_handler)
+            'ui_text_entry_finished', self.__map_box,
+            self.map_handler)
+        
+        #toolbox
+        toolbox_rect = pygame.Rect((self.__toolbox_pos[0],
+                                    self.__toolbox_pos[1]+2*self.toolbox_text_size),
+                                    (240,60))
+        self.__tool_box = pygame_gui.elements.UITextEntryLine(
+                toolbox_rect, self.gui_manager)
+        self.register_gui_event_handler(
+                'ui_text_entry_finished', self.__tool_box,
+                self.tool_handler)
+        
+    def __init_btn(self):
+        btn_rect = pygame.Rect((600, 520), (100, 60))
+        self.__input_box = pygame_gui.elements.UIButton(
+            btn_rect, "完成!", self.gui_manager)
 
-    def __input_complete_handler(self, event):
+        self.register_gui_event_handler(
+            'ui_button_pressed',
+            self.__input_box,
+            lambda e: self.save_map(self.elem_map, self.hero_pos, self.dragon_pos,
+                      self.princess_pos, self.map_name, self.toolbox_num))
+
+    def map_handler(self, event):
         print("Entered text:", event.text)
-        self.save_map(self.elem_map, self.hero_pos, self.dragon_pos,
-                      self.princess_pos, event.text)
+        self.map_name = event.text
+        
+    def tool_handler(self, event):
+        print("Entered text:", event.text)
+        num_str = event.text.split(',')
+        self.toolbox_num = list(map(int, num_str))
 
     def draw(self, window_surface):
         window_surface.blit(self.__background, (0, 0))
         window_surface.blit(self.__title_text, self.__title_pos)
+        window_surface.blit(self.__map_name_text, self.__map_name_pos)
+        window_surface.blit(self.__toolbox_text, self.__toolbox_pos)
 
-    def save_map(self, elem_map, hero_pos, dragon_pos, princess_pos, map_name):
+    def save_map(self, elem_map, hero_pos, dragon_pos, princess_pos, map_name, toolbox_num):
         map_now = {}
         map_now['size'] = [12, 9]
         map_now['tile_size'] = [64, 64]
@@ -155,6 +210,36 @@ class MapNamePage(PageBase):
                 "json": "sprites/princess/character.json"
             }
         ]
+        map_now['toolbox'] = [
+            {
+              "name" : "up",
+              "object_id" : "up_toolbox",
+              "texture" : "tools/up.png",
+              "number" : toolbox_num[0],
+              "position" : []
+            },
+            {
+              "name" : "down",
+              "object_id" : "down_toolbox",
+              "texture" : "tools/down.png",
+              "number" : toolbox_num[1],
+              "position" : []        
+            },
+            {
+              "name" : "left",
+              "object_id" : "left_toolbox",
+              "texture" : "tools/left.png",
+              "number" : toolbox_num[2],
+              "position" : []
+            },
+            {
+              "name" : "right",
+              "object_id" : "right_toolbox",
+              "texture" : "tools/right.png",
+              "number" : toolbox_num[2],
+              "position" : []
+            },     
+        ]           
 
         filename = 'config/%s.json' % map_name
         save_json(filename, map_now)
