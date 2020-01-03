@@ -33,7 +33,7 @@ class StartPage(PageBase):
         # init button
         self.__init_btn()
         self.__init_title()
-        play_bgm()
+        # play_bgm()
 
     def __init_title(self):
         font = get_font('noto-sans-bold', self.title_text_size)
